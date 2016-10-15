@@ -44,25 +44,25 @@ bt.tn:
 
   # second press of bt.tn
   #
-  - file: IncidentReportForm.pdf
+  - file: files/IncidentReportForm.pdf
     type: "application/pdf"
     label: "Print and fill this report"
 
   # third press of bt.tn
   #
-  - file: bt.tn.png
+  - file: files/bt.tn.png
     type: "image/png"
     label: "European buttons that rock"
 
   # fourth press of bt.tn
   #
-  - file: spark.png
+  - file: files/spark.png
     type: "image/png"
     label: "Cisco Spark brings things and human beings together"
 
   # fifth press of bt.tn
   #
-  - file: dimension-data.png
+  - file: files/dimension-data.png
     type: "image/png"
     label: "Build new integrated systems and manage them"
 
