@@ -32,11 +32,11 @@ def from_bttn():
 
         # step 3 - send a message, or upload a file, or both
         #
-        message = build_update()
+        update = build_update()
 
         # step 4 - do the actual update
         #
-        post_update(room_id=room_id, message=message)
+        post_update(room_id=room_id, update=update)
 
         print("Cisco Spark has been updated")
         return "OK\n"
@@ -129,7 +129,7 @@ def delete_room():
 
 def add_audience(room_id):
     """
-    Gives a chance to some listeners to catch messages
+    Gives a chance to some listeners to catch updates
 
     :param room_id: identify the target room
     :type room_id: ``str``
@@ -249,7 +249,7 @@ def post_update(room_id, update):
     headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
 
     if isinstance(update, dict):
-        message['roomId'] = room_id
+        update['roomId'] = room_id
         payload = MultipartEncoder(fields=update)
         headers['Content-Type'] = payload.content_type
     else:
