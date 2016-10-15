@@ -29,8 +29,8 @@ blueprints:
               - "ssh ubuntu@{{ node.public }}"
               - "cd bt.tn-spark"
               - "python hook.py"
-              - "To configure bt.tn:"
-              - "http://{{ node.public }}"
+              - "Ask bt.tn to perform a web request here:"
+              - "http://{{ node.public }}:8080"
 
             appliance: 'Ubuntu 14'
 
