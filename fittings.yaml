@@ -1,0 +1,104 @@
+---
+
+information:
+  - "Green Button web endpoint"
+
+---
+
+locationId: EU8
+
+blueprints:
+
+  - single-node:
+
+      domain:
+        name: GreenPowerFox
+        ipv4: auto
+
+      ethernet:
+        name: GreenPowerNetwork
+        subnet: 10.90.45.0
+
+      nodes:
+        - bttn-01:
+
+            description: "Web endpoint for bt.tn cloud"
+
+            information:
+              - "To activate the server:"
+              - "ssh ubuntu@{{ node.public }}"
+              - "python hook.py"
+              - "To configure bt.tn:"
+              - "http://{{ node.public }}"
+
+            appliance: 'Ubuntu 14'
+
+            cpu: 1
+            memory: 1
+
+            glue:
+              - internet icmp 22 80 443 8080
+
+            monitoring: essentials
+
+            cloud-config:
+
+              packages:
+                - ntp
+                - git
+
+              write_files:
+
+                - path: /etc/profile.d/cisco_spark.sh
+                  permissions: "0700"
+                  content: |
+                    #!/bin/sh
+                    export CISCO_SPARK_TOKEN="{{ environment.CISCO_SPARK_TOKEN }}"
+
+                - path: /root/hosts.awk
+                  content: |
+                    #!/usr/bin/awk -f
+                    /^{{ node.public }}/ {next}
+                    /^{{ node.private }}/ {next}
+                    {print}
+                    END {
+                     print "{{ node.public }}    {{ node.name }}"
+                     print "{{ node.private }}    {{ node.name }}"
+                    }
+
+              runcmd:
+
+                - echo "===== Handling ubuntu identity"
+                - cp -n /etc/ssh/ssh_host_rsa_key /home/ubuntu/.ssh/id_rsa
+                - cp -n /etc/ssh/ssh_host_rsa_key.pub /home/ubuntu/.ssh/id_rsa.pub
+                - chown ubuntu:ubuntu /home/ubuntu/.ssh/*
+                - sed -i "/StrictHostKeyChecking/s/^.*$/    StrictHostKeyChecking no/" /etc/ssh/ssh_config
+
+                - echo "===== Updating /etc/hosts"
+                - cp -n /etc/hosts /etc/hosts.original
+                - awk -f /root/hosts.awk /etc/hosts >/etc/hosts.new && mv /etc/hosts.new /etc/hosts
+
+                - echo "===== Installing the code"
+                - cd /home/ubuntu
+                - git clone https://github.com/bernard357/bt.tn-spark.git
+                - pip install -r requirements.txt
+
+              hostname: "{{ node.name }}"
+
+              ssh_keys:
+                rsa_private: |
+                  {{ rsa_private.key }}
+                rsa_public: "{{ rsa_public.key }}"
+
+              users:
+                - default
+
+                - name: ubuntu
+                  sudo: 'ALL=(ALL) NOPASSWD:ALL'
+                  ssh-authorized-keys:
+                    - "{{ rsa_public.key }}"
+                    - "{{ rsa_public.local }}"
+
+              disable_root: false
+              ssh_pwauth: false
+

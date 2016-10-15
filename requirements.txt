@@ -1,0 +1,4 @@
+bottle
+json
+PyYAML
+requests
