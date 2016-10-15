@@ -15,24 +15,35 @@ def from_bttn():
     """
     Processes the press of a bt.tn device
 
-    This function is called when the button is pressed
+    This function is called from far far away, over the Internet
     """
 
     print("Button has been pressed")
+
     try:
 
+        # step 1 - get a room, or create one if needed
+        #
         room_id = get_room()
 
+        # step 2 - ensure they are some listeners here
+        #
         add_audience(room_id)
 
-        message = build_message()
+        # step 3 - send a message, or upload a file, or both
+        #
+        message = build_update()
 
-        post_message(room_id=room_id, message=message)
+        # step 4 - do the actual update
+        #
+        post_update(room_id=room_id, message=message)
 
         print("Cisco Spark has been updated")
         return "OK\n"
 
     except Exception as feedback:
+        print("ABORTED: fatal error has been encountered")
+        print(str(feedback))
         return str(feedback)+'\n'
 
 
@@ -47,8 +58,9 @@ def get_room():
     """
 
     print("Looking for Cisco Spark room '{}'".format(settings['room']))
+
     url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_TOKEN']}
+    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
     response = requests.get(url=url, headers=headers)
 
     if response.status_code != 200:
@@ -62,8 +74,9 @@ def get_room():
 
     print("- not found")
     print("Creating Cisco Spark room")
+
     url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_TOKEN']}
+    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
     payload = {'title': settings['room'] }
     response = requests.post(url=url, headers=headers, data=payload)
 
@@ -74,45 +87,17 @@ def get_room():
     print("- done")
     return response.json()['id']
 
-def purge_room(room_id):
-    """
-    Purges the target Cisco Spark room
-
-    :param room_id: identify the target room
-    :type room_id: ``str``
-
-    """
-
-    print("Purging room {}".format(room_id))
-
-    url = 'https://api.ciscospark.com/v1/messages'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_TOKEN']}
-    payload = {'roomId': room_id }
-    response = requests.get(url=url, headers=headers, data=payload)
-
-    if response.status_code != 200:
-        print(response.json())
-        raise Exception("Received error code {}".format(response.status_code))
-
-    for item in response.json()['items']:
-        print("- deleting message {}".format(item['id']))
-
-        url = 'https://api.ciscospark.com/v1/messages/{}'.format(item['id'])
-        headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_TOKEN']}
-        response = requests.delete(url=url, headers=headers)
-
-        if response.status_code != 204:
-            raise Exception("Received error code {}".format(response.status_code))
-
 def delete_room():
     """
     Deletes the target Cisco Spark room
 
+    This function is useful to restart a clean demo environment
     """
 
     print("Deleting Cisco Spark room '{}'".format(settings['room']))
+
     url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_TOKEN']}
+    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
     response = requests.get(url=url, headers=headers)
 
     if response.status_code != 200:
@@ -121,12 +106,13 @@ def delete_room():
 
     actual = False
     for item in response.json()['items']:
+
         if settings['room'] in item['title']:
             print("- found it")
             print("- DELETING IT")
 
             url = 'https://api.ciscospark.com/v1/rooms/{}'.format(item['id'])
-            headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_TOKEN']}
+            headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
             response = requests.delete(url=url, headers=headers)
 
             if response.status_code != 204:
@@ -139,44 +125,81 @@ def delete_room():
     else:
         print("- no room with this name yet - it will be created on next button depress")
 
+    settings['shouldAddModerator'] = True
+
 def add_audience(room_id):
     """
-    Gives a chance to listeners to catch the message
+    Gives a chance to some listeners to catch messages
 
     :param room_id: identify the target room
     :type room_id: ``str``
 
-    This function adds listeners to a Cisco Spark room if necessary
+    This function adds pre-defined listeners to a Cisco Spark room if necessary
     """
-    pass
 
-def build_message():
+    if settings['shouldAddModerator'] is False:
+        return
+
+    print("Adding moderator to the Cisco Spark room")
+
+    url = 'https://api.ciscospark.com/v1/memberships'
+    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
+    payload = {'roomId': room_id,
+               'personEmail': settings['CISCO_SPARK_BTTN_MAN'],
+               'isModerator': 'true' }
+    response = requests.post(url=url, headers=headers, data=payload)
+
+    if response.status_code != 200:
+        print(response.json())
+        raise Exception("Received error code {}".format(response.status_code))
+
+    print("- done")
+
+    settings['shouldAddModerator'] = False
+
+def build_update():
     """
-    Prepares a message for human beings
+    Prepares an update that can be read by human beings
 
-    :return: the message to be posted
+    :return: the update to be posted
     :rtype: ``str`` or ``dict`
 
+    This function monitors the number of button pushes, and uses the appropriate
+    action as defined in the configuration file, under the `bt.tn:` keyword.
+
+    The action can be either:
+
+    * send a text message to the room with `text:` statement
+    * send a Markdown message to the room with `markdown:` statement
+    * upload a file with `file:`, `label:` and `type:`
+    * send a message and attach a file
+
+
     """
-    print("Building message")
+
+    print("Building update")
 
     items = settings['bt.tn']
     if settings['count'] < len(items):
         print("- using item {}".format(settings['count']))
         item = items[ settings['count'] ]
 
-        message = {}
+        update = {}
 
+        # textual message
+        #
         if 'markdown' in item:
 
             text = 'using markdown content'
-            message['markdown'] = item['markdown']
+            update['markdown'] = item['markdown']
 
         elif 'message' in item:
 
-            text = item['message']
-            message['text'] = item['message']
+            text = "'{}".format(item['message'])
+            update['text'] = item['message']
 
+        # file upload
+        #
         if 'file' in item:
 
             print("- attaching file {}".format(item['file']))
@@ -184,8 +207,8 @@ def build_message():
             if 'label' in item:
                 text = item['label']
 
-                if 'text' not in message:
-                    message['text'] = text
+                if 'text' not in update:
+                    update['text'] = "'{}'".format(item['label'])
 
             else:
                 text = item['file']
@@ -195,42 +218,42 @@ def build_message():
             else:
                 type = 'application/octet-stream'
 
-            message['files'] = (text, open(item['file'], 'rb'), type)
+            update['files'] = (text, open(item['file'], 'rb'), type)
 
     else:
         text = 'ping {}'.format(settings['count'])
-        message = text
+        update = text
 
     settings['count'] += 1
 
-    print("- '{}'".format(text))
-    return message
+    print("- {}".format(text))
+    return update
 
-def post_message(room_id, message):
+def post_update(room_id, update):
     """
     Updates a Cisco Spark room
 
     :param room_id: identify the target room
     :type room_id: ``str``
 
-    :param message: content of the update to be posted there
-    :type message: ``str`` or ``dict``
+    :param update: content of the update to be posted there
+    :type update: ``str`` or ``dict``
 
-    If the message is a simple string, it is sent as such to Cisco Spark.
+    If the update is a simple string, it is sent as such to Cisco Spark.
     Else if it a dictionary, then it is encoded as MIME Multipart.
     """
 
-    print("Posting message to Cisco Spark room")
+    print("Posting update to Cisco Spark room")
 
     url = 'https://api.ciscospark.com/v1/messages'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_TOKEN']}
+    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
 
-    if isinstance(message, dict):
+    if isinstance(update, dict):
         message['roomId'] = room_id
-        payload = MultipartEncoder(fields=message)
+        payload = MultipartEncoder(fields=update)
         headers['Content-Type'] = payload.content_type
     else:
-        payload = {'roomId': room_id, 'text': message }
+        payload = {'roomId': room_id, 'text': update }
 
     response = requests.post(url=url, headers=headers, data=payload)
 
@@ -238,9 +261,9 @@ def post_message(room_id, message):
         print(response.json())
         raise Exception("Received error code {}".format(response.status_code))
 
-    print('- done, check the room')
+    print('- done, check the room with Cisco Spark client software')
 
-def initialize(name="settings.yaml"):
+def configure(name="settings.yaml"):
     """
     Reads configuration information
 
@@ -250,11 +273,14 @@ def initialize(name="settings.yaml"):
     The function loads configuration from the file and from the environment.
     Port number can be set from the command line.
 
-    Sample configuration file to illustrate capabilities of the program:
-
-        port: 8080
+    Sample configuration file to illustrate capabilities of the program::
 
         room: "Green Forge"
+
+        CISCO_SPARK_BTTN_BOT: "YWM2OEG4OGItNTQ5YS00MDU2LThkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtZWyY"
+        CISCO_SPARK_BTTN_MAN: "foo.bar@acme.com"
+
+        port: 8080
 
         bt.tn:
 
@@ -287,7 +313,7 @@ def initialize(name="settings.yaml"):
 
           - file: spark.png
             type: "image/png"
-            label: "Cisco Spark joins things with human beings"
+            label: "Cisco Spark brings things and human beings together"
 
           - file: dimension-data.png
             type: "image/png"
@@ -295,11 +321,12 @@ def initialize(name="settings.yaml"):
 
     """
 
-    print("Initialising the configuration")
+    print("Loading the configuration")
 
     with open(name, 'r') as stream:
         try:
             settings = yaml.load(stream)
+            print("- from '{}'".format(name))
         except Exception as feedback:
             logging.error(str(feedback))
             sys.exit(1)
@@ -332,23 +359,38 @@ def initialize(name="settings.yaml"):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
 
-    if 'CISCO_SPARK_TOKEN' not in settings:
-        token = os.environ.get('CISCO_SPARK_TOKEN')
+    if 'CISCO_SPARK_BTTN_BOT' not in settings:
+        token = os.environ.get('CISCO_SPARK_BTTN_BOT')
         if token is None:
-            logging.error("Missing CISCO_SPARK_TOKEN in the environment")
+            logging.error("Missing CISCO_SPARK_BTTN_BOT in the environment")
             sys.exit(1)
-        settings['CISCO_SPARK_TOKEN'] = token
+        settings['CISCO_SPARK_BTTN_BOT'] = token
+
+    if 'CISCO_SPARK_BTTN_MAN' not in settings:
+        emails = os.environ.get('CISCO_SPARK_BTTN_MAN')
+        if emails is None:
+            logging.error("Missing CISCO_SPARK_NTTN_MAN in the environment")
+            sys.exit(1)
+        settings['CISCO_SPARK_BTTN_MAN'] = emails
 
     settings['count'] = 0
 
     return settings
 
+# the program launched from the command line
+#
 if __name__ == "__main__":
 
-    settings = initialize()
+    # read configuration file, look at the environment
+    #
+    settings = configure()
 
+    # create a clean environment for the demo
+    #
     delete_room()
 
+    # wait for button pushes and process them
+    #
     print("Preparing for web requests")
     run(host='0.0.0.0',
         port=settings['port'],

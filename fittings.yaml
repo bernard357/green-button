@@ -55,7 +55,8 @@ blueprints:
                   permissions: "0755"
                   content: |
                     #!/bin/sh
-                    export CISCO_SPARK_TOKEN="{{ environment.CISCO_SPARK_TOKEN }}"
+                    export CISCO_SPARK_BTTN_BOT="{{ environment.CISCO_SPARK_BTTN_BOT }}"
+                    export CISCO_SPARK_BTTN_MAN="{{ environment.CISCO_SPARK_BTTN_MAN }}"
 
                 - path: /root/hosts.awk
                   content: |
