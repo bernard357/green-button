@@ -1,6 +1,8 @@
 # bt.tn-spark
 Press a bt.tn to feed Cisco Spark
 
+![Architecture](architecture.png)
+
 ### What do you need to run this demo?
 
 * a green button that can trigger a web link, like one of [the smart products from bt.tn](https://bt.tn/shop/) for example
