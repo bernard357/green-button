@@ -6,12 +6,12 @@ port: 8080
 #
 room: "Green Forge"
 
-# the token that has been created for this bot should normally come from
+# the token that has been created for this bot should normally be set in
 # the environment but you can override the configuration below
 #
 # CISCO_SPARK_BTTN_BOT: "YWM2OEG4OGItNTQ5YS00MDU2LThkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtZWyY"
 
-# the address of the first moderator should normally come from
+# the email address of the first moderator should normally be set in
 # the environment but you can override the configuration below
 #
 # CISCO_SPARK_BTTN_MAN: "foo.bar@acme.com"
