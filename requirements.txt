@@ -1,4 +1,4 @@
 bottle
-json
 PyYAML
 requests
+requests_toolbelt

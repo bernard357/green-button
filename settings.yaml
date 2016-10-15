@@ -1,5 +1,44 @@
+port: 8080
+
 room: "Green Forge"
 
-bt.tn: "Green Power has been triggered again"
+bt.tn:
 
-port: 8080
+  - markdown: |
+        Green Power has been invoked again
+        ==================================
+
+        The [green button](https://d2jaw3pqpetn6l.cloudfront.net/app/uploads/2016/05/27125600/product-images-bttn-normal-green-600x600.jpg) has been pressed, so there is a need for urgent action.
+
+        Some context to this event: *Italic*, **bold**, and `monospace`.
+        Itemized lists look like this:
+
+          * this one
+          * that one
+          * the other one
+
+        Unicode is supported. ㋡
+
+        And [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM)) too.
+
+        Call Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) if people are late to join this room. We will continue to provide information so stay tuned.
+
+
+  - file: IncidentReportForm.pdf
+    type: "application/pdf"
+    label: "Print and fill this report"
+
+  - file: bt.tn.png
+    type: "image/png"
+    label: "European buttons that rock"
+
+  - file: spark.png
+    type: "image/png"
+    label: "Cisco Spark brings things and human beings together"
+
+  - file: dimension-data.png
+    type: "image/png"
+    label: "Build new integrated systems and manage them"
+
+
+
