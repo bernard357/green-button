@@ -301,8 +301,6 @@ def configure(name="settings.yaml"):
                 Call Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) if people are late to join this room.
                 We will continue to feed this room with information.
 
-
-
           - file: IncidentReportForm.pdf
             type: "application/pdf"
             label: "Print and fill this report"

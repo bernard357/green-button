@@ -109,6 +109,19 @@ repository on your workstation, and then run plumbery: `python -m plumbery fitti
 
 ![3-plumbery](docs/3-plumbery.png)
 
+Else if you have to go the manual way, then first secure a Ubuntu machine and consider following steps.
+
+```bash
+$ sudo apt-get install -y ntp git python-pip
+$ cd /home/ubuntu/
+$ git clone https://github.com/bernard357/bt.tn-spark.git
+$ cd bt.tn-spark/
+$ pip install -r requirements.txt
+$ export CISCO_SPARK_BTTN_BOT="<whatever_your_token_is>"
+$ export CISCO_SPARK_BTTN_MAN="<email_address_of_room_moderator>"
+$ python hook.py
+```
+
 ### Step 4. Activate the bot.
 
 If you have used plumbery at the previous step, just follow instructions on screen.
