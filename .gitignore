@@ -90,3 +90,5 @@ ENV/
 
 # private stuff
 .secrets
+
+*.secrets
