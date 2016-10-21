@@ -30,13 +30,9 @@ def from_bttn():
         #
         add_audience(room_id)
 
-        # step 3 - send a message, or upload a file, or both
+        # step 3 - process the action
         #
-        update = build_update()
-
-        # step 4 - do the actual update
-        #
-        post_update(room_id=room_id, update=update)
+        process_push(room_id)
 
         print("Cisco Spark has been updated")
         return "OK\n"
@@ -157,9 +153,12 @@ def add_audience(room_id):
 
     settings['shouldAddModerator'] = False
 
-def call_conference(numbers):
+def call_conference(room_id, numbers):
     """"
     Triggers a conference call
+
+    :param room_id: identify the target room
+    :type room_id: ``str``
 
     :param numbers: a list of phone numbers to call
     :type numbers: ``list``
@@ -167,18 +166,28 @@ def call_conference(numbers):
     This function creates a conference call and adds phone participants
     """
     print("- adding a conference call")
+    update = { 'markdown': 'Arranging a conference call'}
+    post_update(room_id, update)
+
+    time.sleep(3)
+
+    update = { 'markdown': 'Call [+44 12 34 56 78](tel:+44-12-34-56-78) to join the conference call from any phone.'}
+    post_update(room_id, update)
 
     for line in numbers:
         print("- calling '{}'".format(line))
+        update = { 'markdown': 'Adding {} to the conference call'.format(line)}
+        post_update(room_id, update)
 
-    return "Failed attempt to arrange a conference call"
+    time.sleep(5)
+    return "Conference call will end when all participants will leave it"
 
-def build_update():
+def process_push(room_id):
     """
-    Prepares an update that can be read by human beings
+    Processes one push of the button
 
-    :return: the update to be posted
-    :rtype: ``str`` or ``dict`
+    :param room_id: identify the target room
+    :type room_id: ``str``
 
     This function monitors the number of button pushes, and uses the appropriate
     action as defined in the configuration file, under the `bt.tn:` keyword.
@@ -188,7 +197,8 @@ def build_update():
     * send a text message to the room with `text:` statement
     * send a Markdown message to the room with `markdown:` statement
     * upload a file with `file:`, `label:` and `type:`
-    * send a message and attach a file
+    * arrange a conference with numbers under the 'conference:' statement
+    * a combination of any previous
 
 
     """
@@ -238,7 +248,7 @@ def build_update():
         #
         if 'conference' in item:
 
-            update['text'] += call_conference(item['conference'])+'\n'
+            update['text'] += call_conference(room_id, item['conference'])+'\n'
 
     else:
         text = 'ping {}'.format(settings['count'])
@@ -247,7 +257,7 @@ def build_update():
     settings['count'] += 1
 
     print("- {}".format(text))
-    return update
+    post_update(room_id, update)
 
 def post_update(room_id, update):
     """
@@ -390,6 +400,20 @@ def configure(name="settings.yaml"):
             logging.error("Missing CISCO_SPARK_NTTN_MAN in the environment")
             sys.exit(1)
         settings['CISCO_SPARK_BTTN_MAN'] = emails
+
+    if 'CISCO_TROPO_API_KEY' not in settings:
+        token = os.environ.get('CISCO_TROPO_API_KEY')
+        if token is None:
+            logging.error("Missing CISCO_TROPO_API_KEY in the environment")
+            sys.exit(1)
+        settings['CISCO_TROPO_API_KEY'] = token
+
+    if 'CISCO_TROPO_API_SECRET' not in settings:
+        token = os.environ.get('CISCO_TROPO_API_SECRET')
+        if token is None:
+            logging.error("Missing CISCO_TROPO_API_SECRET in the environment")
+            sys.exit(1)
+        settings['CISCO_TROPO_API_SECRET'] = token
 
     settings['count'] = 0
 
