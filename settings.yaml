@@ -26,7 +26,7 @@ bt.tn:
         Green Power has been invoked again
         ==================================
 
-        The [green button](https://d2jaw3pqpetn6l.cloudfront.net/app/uploads/2016/05/27125600/product-images-bttn-normal-green-600x600.jpg) has been pressed, so there is a need for urgent action.
+        The [green button](https://d2jaw3pqpetn6l.cloudfront.net/app/uploads/2016/05/27125600/product-images-bttn-normal-green-600x600.jpg) has been pressed, so there is a need for collective action.
 
         Some context to this event: *Italic*, **bold**, and `monospace`.
         Itemized lists look like this:
@@ -37,34 +37,46 @@ bt.tn:
 
         Unicode is supported. ㋡
 
-        And [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM)) too.
-
-        Call Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) if people are late to join this room. We will continue to provide information so stay tuned.
-
+    file: files/dashboard.png
+    type: "image/png"
+    label: "Current status of the server"
 
   # second press of bt.tn
   #
-  - file: files/IncidentReportForm.pdf
-    type: "application/pdf"
-    label: "Print and fill this report"
+  - markdown: |
+        The button has been pressed again, so you may need more information on our processes.
+        Reference information can be found here: [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM))
+
+        Aside from information already shared in this room, you may want to capture more facts and share these with us.
+        Please print and fill the form below. Call our Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) for any real-time assistance you may need.
+
+    conference:
+      - +352 691 4496 401
 
   # third press of bt.tn
   #
-  - file: files/bt.tn.png
-    type: "image/png"
-    label: "European buttons that rock"
+  - markdown: |
+        The button has been pressed again, so you may need more information on our processes.
+        Reference information can be found here: [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM))
+
+        Aside from information already shared in this room, you may want to capture more facts and share these with us.
+        Please print and fill the form below. Call our Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) for any real-time assistance you may need.
+
+    file: files/IncidentReportForm.pdf
+    type: "application/pdf"
+    label: "Print and fill this form"
 
   # fourth press of bt.tn
-  #
-  - file: files/spark.png
-    type: "image/png"
-    label: "Cisco Spark brings things and human beings together"
-
-  # fifth press of bt.tn
   #
   - file: files/dimension-data.png
     type: "image/png"
     label: "Build new integrated systems and manage them"
+
+  # fifth press of bt.tn
+  #
+  - file: files/spark.png
+    type: "image/png"
+    label: "Cisco Spark brings things and human beings together"
 
 
 
