@@ -182,6 +182,60 @@ def call_conference(room_id, numbers):
     time.sleep(5)
     return "Conference call will end when all participants will leave it"
 
+def send_sms(room_id, details):
+    """"
+    Sends a SMS to target people
+
+    :param room_id: identify the target room
+    :type room_id: ``str``
+
+    :param details: what to send and to which numbers
+    :type details: ``list``
+
+    This function uses the Tropo API to send a SMS message to target people
+    """
+    print("- sending a SMS")
+
+    message = ''
+    numbers = []
+
+    for line in details:
+        if not isinstance(line, dict):
+            print("- invalid statement: '{}'".format(str(line)))
+            update = { 'markdown': 'Unable to send a SMS - check configuration'}
+            post_update(room_id, update)
+            return
+
+        if line.keys()[0] == 'message':
+            message = line['message']
+
+        if line.keys()[0] == 'number':
+            numbers.append(line['number'])
+
+    if len(message) < 4:
+        print("- message should have at least 4 characters: '{}'".format(str(message)))
+        update = { 'markdown': 'No SMS message to send - check configuration'}
+        post_update(room_id, update)
+        return
+
+    print("- sending '{}'".format(message))
+    update = { 'markdown': "Sending a SMS '{}'".format(message)}
+    post_update(room_id, update)
+
+    if len(numbers) < 1:
+        print("- no phone number has been defined")
+        update = { 'markdown': 'No target phone number for SMS - check configuration'}
+        post_update(room_id, update)
+        return
+
+    for number in numbers:
+        print("- sending to '{}'".format(number))
+        update = { 'markdown': 'Sending SMS to {}'.format(number)}
+        post_update(room_id, update)
+
+    time.sleep(5)
+    return "SMS has been sent"
+
 def process_push(room_id):
     """
     Processes one push of the button
@@ -249,6 +303,12 @@ def process_push(room_id):
         if 'conference' in item:
 
             update['text'] += call_conference(room_id, item['conference'])+'\n'
+
+        # send a SMS
+        #
+        if 'sms' in item:
+
+            update['text'] += send_sms(room_id, item['sms'])+'\n'
 
     else:
         text = 'ping {}'.format(settings['count'])
