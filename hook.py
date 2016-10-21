@@ -157,6 +157,22 @@ def add_audience(room_id):
 
     settings['shouldAddModerator'] = False
 
+def call_conference(numbers):
+    """"
+    Triggers a conference call
+
+    :param numbers: a list of phone numbers to call
+    :type numbers: ``list``
+
+    This function creates a conference call and adds phone participants
+    """
+    print("- adding a conference call")
+
+    for line in numbers:
+        print("- calling '{}'".format(line))
+
+    return "Failed attempt to arrange a conference call"
+
 def build_update():
     """
     Prepares an update that can be read by human beings
@@ -184,7 +200,7 @@ def build_update():
         print("- using item {}".format(settings['count']))
         item = items[ settings['count'] ]
 
-        update = {}
+        update = {'text', ''}
 
         # textual message
         #
@@ -196,7 +212,7 @@ def build_update():
         elif 'message' in item:
 
             text = "'{}".format(item['message'])
-            update['text'] = item['message']
+            update['text'] += item['message']+'\n'
 
         # file upload
         #
@@ -206,9 +222,7 @@ def build_update():
 
             if 'label' in item:
                 text = item['label']
-
-                if 'text' not in update:
-                    update['text'] = "'{}'".format(item['label'])
+                update['text'] += "'{}'".format(item['label']).'\n'
 
             else:
                 text = item['file']
@@ -219,6 +233,12 @@ def build_update():
                 type = 'application/octet-stream'
 
             update['files'] = (text, open(item['file'], 'rb'), type)
+
+        # conference call
+        #
+        if 'conference' in item:
+
+            update['text'] += call_conference(item['conference'])+'\n'
 
     else:
         text = 'ping {}'.format(settings['count'])
