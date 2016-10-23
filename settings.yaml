@@ -4,7 +4,7 @@ port: 8080
 
 # the name of the Cisco Spark room handled by this bot
 #
-room: "Green Forge"
+room: "Green Power demonstration"
 
 # the token that has been created for this bot should normally be set in
 # the environment but you can override the configuration below
@@ -41,19 +41,12 @@ bt.tn:
     type: "image/png"
     label: "Current status of the server"
 
+    sms:
+      - message: "Check Cisco Spark"
+      - number: "+352691496401"
+      - from: "33644606827"
+
   # second press of bt.tn
-  #
-  - markdown: |
-        The button has been pressed again, so you may need more information on our processes.
-        Reference information can be found here: [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM))
-
-        Aside from information already shared in this room, you may want to capture more facts and share these with us.
-        Please print and fill the form below. Call our Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) for any real-time assistance you may need.
-
-    conference:
-      - +352 691 4496 401
-
-  # third press of bt.tn
   #
   - markdown: |
         The button has been pressed again, so you may need more information on our processes.
@@ -65,6 +58,20 @@ bt.tn:
     file: files/IncidentReportForm.pdf
     type: "application/pdf"
     label: "Print and fill this form"
+
+    sms:
+      - message: "Second click on green button"
+      - number: "+352691496401"
+      - from: "33644606827"
+
+  # third press of bt.tn
+  #
+  - markdown: |
+        The button has been pressed again, so there may be a need for immediate collective review of the situation.
+        A conference call will be arranged right now. Pre-defined phone numbers will be called directly.
+
+    conference:
+      - +3526914496401
 
   # fourth press of bt.tn
   #

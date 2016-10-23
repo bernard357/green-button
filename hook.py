@@ -6,10 +6,14 @@ import requests
 from requests_toolbelt import MultipartEncoder
 import sys
 import time
+from twilio import TwilioRestException
+from twilio.rest import TwilioRestClient
 import yaml
 from bottle import route, run, request, abort
 
 
+# from bt.tn -- index page is triggered by the button itself
+#
 @route("/", method=['GET', 'POST'])
 def from_bttn():
     """
@@ -40,8 +44,12 @@ def from_bttn():
     except Exception as feedback:
         print("ABORTED: fatal error has been encountered")
         print(str(feedback))
-        return str(feedback)+'\n'
+        raise
+#        return str(feedback)+'\n'
 
+#
+# Handle Cisco Spark API
+#
 
 def get_room():
     """
@@ -153,6 +161,44 @@ def add_audience(room_id):
 
     settings['shouldAddModerator'] = False
 
+def post_update(room_id, update):
+    """
+    Updates a Cisco Spark room
+
+    :param room_id: identify the target room
+    :type room_id: ``str``
+
+    :param update: content of the update to be posted there
+    :type update: ``str`` or ``dict``
+
+    If the update is a simple string, it is sent as such to Cisco Spark.
+    Else if it a dictionary, then it is encoded as MIME Multipart.
+    """
+
+    print("Posting update to Cisco Spark room")
+
+    url = 'https://api.ciscospark.com/v1/messages'
+    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
+
+    if isinstance(update, dict):
+        update['roomId'] = room_id
+        payload = MultipartEncoder(fields=update)
+        headers['Content-Type'] = payload.content_type
+    else:
+        payload = {'roomId': room_id, 'text': update }
+
+    response = requests.post(url=url, headers=headers, data=payload)
+
+    if response.status_code != 200:
+        print(response.json())
+        raise Exception("Received error code {}".format(response.status_code))
+
+    print('- done, check the room with Cisco Spark client software')
+
+#
+# handle Twilio API
+#
+
 def call_conference(room_id, numbers):
     """"
     Triggers a conference call
@@ -196,8 +242,12 @@ def send_sms(room_id, details):
     """
     print("- sending a SMS")
 
+    handle = TwilioRestClient(settings['TWILIO_ACCOUNT_SID'],
+                              settings['TWILIO_AUTH_TOKEN'])
+
     message = ''
-    numbers = []
+    from_number = None
+    to_numbers = []
 
     for line in details:
         if not isinstance(line, dict):
@@ -209,8 +259,11 @@ def send_sms(room_id, details):
         if line.keys()[0] == 'message':
             message = line['message']
 
+        if line.keys()[0] == 'from':
+            from_number = line['from']
+
         if line.keys()[0] == 'number':
-            numbers.append(line['number'])
+            to_numbers.append(line['number'])
 
     if len(message) < 4:
         print("- message should have at least 4 characters: '{}'".format(str(message)))
@@ -222,19 +275,38 @@ def send_sms(room_id, details):
     update = { 'markdown': "Sending a SMS '{}'".format(message)}
     post_update(room_id, update)
 
-    if len(numbers) < 1:
+    if len(to_numbers) < 1:
         print("- no phone number has been defined")
         update = { 'markdown': 'No target phone number for SMS - check configuration'}
         post_update(room_id, update)
         return
 
-    for number in numbers:
+    if from_number is None:
+        from_number = to_numbers[0]
+
+    for number in to_numbers:
         print("- sending to '{}'".format(number))
-        update = { 'markdown': 'Sending SMS to {}'.format(number)}
-        post_update(room_id, update)
+
+        try:
+            message = handle.messages.create(body=message,
+                                             to=number,
+                                             from_=from_number)
+
+            update = { 'markdown': 'Sending SMS to {}'.format(number)}
+            post_update(room_id, update)
+
+        except TwilioRestException as feedback:
+            print("- {}".format(str(feedback)))
+
+            update = { 'markdown': 'Error while sending SMS'}
+            post_update(room_id, update)
 
     time.sleep(5)
     return "SMS has been sent"
+
+#
+# behaviour of this software robot
+#
 
 def process_push(room_id):
     """
@@ -254,7 +326,6 @@ def process_push(room_id):
     * arrange a conference with numbers under the 'conference:' statement
     * a combination of any previous
 
-
     """
 
     print("Building update")
@@ -264,7 +335,7 @@ def process_push(room_id):
         print("- using item {}".format(settings['count']))
         item = items[ settings['count'] ]
 
-        update = {'text', ''}
+        update = {'text': ''}
 
         # textual message
         #
@@ -286,7 +357,7 @@ def process_push(room_id):
 
             if 'label' in item:
                 text = item['label']
-                update['text'] += "'{}'".format(item['label']).'\n'
+                update['text'] += "'{}'".format(item['label'])+'\n'
 
             else:
                 text = item['file']
@@ -318,40 +389,6 @@ def process_push(room_id):
 
     print("- {}".format(text))
     post_update(room_id, update)
-
-def post_update(room_id, update):
-    """
-    Updates a Cisco Spark room
-
-    :param room_id: identify the target room
-    :type room_id: ``str``
-
-    :param update: content of the update to be posted there
-    :type update: ``str`` or ``dict``
-
-    If the update is a simple string, it is sent as such to Cisco Spark.
-    Else if it a dictionary, then it is encoded as MIME Multipart.
-    """
-
-    print("Posting update to Cisco Spark room")
-
-    url = 'https://api.ciscospark.com/v1/messages'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
-
-    if isinstance(update, dict):
-        update['roomId'] = room_id
-        payload = MultipartEncoder(fields=update)
-        headers['Content-Type'] = payload.content_type
-    else:
-        payload = {'roomId': room_id, 'text': update }
-
-    response = requests.post(url=url, headers=headers, data=payload)
-
-    if response.status_code != 200:
-        print(response.json())
-        raise Exception("Received error code {}".format(response.status_code))
-
-    print('- done, check the room with Cisco Spark client software')
 
 def configure(name="settings.yaml"):
     """
@@ -461,19 +498,19 @@ def configure(name="settings.yaml"):
             sys.exit(1)
         settings['CISCO_SPARK_BTTN_MAN'] = emails
 
-    if 'CISCO_TROPO_API_KEY' not in settings:
-        token = os.environ.get('CISCO_TROPO_API_KEY')
+    if 'TWILIO_ACCOUNT_SID' not in settings:
+        token = os.environ.get('TWILIO_ACCOUNT_SID')
         if token is None:
-            logging.error("Missing CISCO_TROPO_API_KEY in the environment")
+            logging.error("Missing TWILIO_ACCOUNT_SID in the environment")
             sys.exit(1)
-        settings['CISCO_TROPO_API_KEY'] = token
+        settings['TWILIO_ACCOUNT_SID'] = token
 
-    if 'CISCO_TROPO_API_SECRET' not in settings:
-        token = os.environ.get('CISCO_TROPO_API_SECRET')
+    if 'TWILIO_AUTH_TOKEN' not in settings:
+        token = os.environ.get('TWILIO_AUTH_TOKEN')
         if token is None:
-            logging.error("Missing CISCO_TROPO_API_SECRET in the environment")
+            logging.error("Missing TWILIO_AUTH_TOKEN in the environment")
             sys.exit(1)
-        settings['CISCO_TROPO_API_SECRET'] = token
+        settings['TWILIO_AUTH_TOKEN'] = token
 
     settings['count'] = 0
 
@@ -491,7 +528,7 @@ if __name__ == "__main__":
     #
     delete_room()
 
-    # wait for button pushes and process them
+    # wait for button pushes and other web requests
     #
     print("Preparing for web requests")
     run(host='0.0.0.0',
