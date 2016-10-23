@@ -45,7 +45,6 @@ def from_bttn():
         print("ABORTED: fatal error has been encountered")
         print(str(feedback))
         raise
-#        return str(feedback)+'\n'
 
 #
 # Handle Cisco Spark API
@@ -238,7 +237,7 @@ def send_sms(room_id, details):
     :param details: what to send and to which numbers
     :type details: ``list``
 
-    This function uses the Tropo API to send a SMS message to target people
+    This function uses the Twilio API to send a SMS message to target people
     """
     print("- sending a SMS")
 
@@ -272,8 +271,6 @@ def send_sms(room_id, details):
         return
 
     print("- sending '{}'".format(message))
-    update = { 'markdown': "Sending a SMS '{}'".format(message)}
-    post_update(room_id, update)
 
     if len(to_numbers) < 1:
         print("- no phone number has been defined")
@@ -288,21 +285,17 @@ def send_sms(room_id, details):
         print("- sending to '{}'".format(number))
 
         try:
-            message = handle.messages.create(body=message,
-                                             to=number,
-                                             from_=from_number)
-
-            update = { 'markdown': 'Sending SMS to {}'.format(number)}
-            post_update(room_id, update)
+            handle.messages.create(body=message,
+                                   to=number,
+                                   from_=from_number)
 
         except TwilioRestException as feedback:
             print("- {}".format(str(feedback)))
+            return
 
-            update = { 'markdown': 'Error while sending SMS'}
-            post_update(room_id, update)
-
-    time.sleep(5)
-    return "SMS has been sent"
+    update = { 'markdown': "SMS '{}' has been sent to '{}'".format(message,
+                                                   ', '.join(to_numbers))}
+    post_update(room_id, update)
 
 #
 # behaviour of this software robot
@@ -372,14 +365,12 @@ def process_push(room_id):
         # conference call
         #
         if 'conference' in item:
-
-            update['text'] += call_conference(room_id, item['conference'])+'\n'
+            call_conference(room_id, item['conference'])
 
         # send a SMS
         #
         if 'sms' in item:
-
-            update['text'] += send_sms(room_id, item['sms'])+'\n'
+            send_sms(room_id, item['sms'])
 
     else:
         text = 'ping {}'.format(settings['count'])
