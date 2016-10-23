@@ -59,21 +59,16 @@ bt.tn:
     type: "application/pdf"
     label: "Print and fill this form"
 
-    call:
-      - number: "+352691496401"
-      - from: "33644606827"
-      - url: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
-
   # third press of bt.tn
   #
   - markdown: |
         The button has been pressed again, so there may be a need for immediate collective review of the situation.
         A telephone call is taking place right now. Pre-defined phone numbers will be called directly.
 
-    conference:
-      - name: "War Room"
+    call:
       - number: "+352691496401"
       - from: "33644606827"
+      - url: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
 
   # fourth press of bt.tn
   #

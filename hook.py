@@ -198,35 +198,6 @@ def post_update(room_id, update):
 # handle Twilio API
 #
 
-def call_conference(room_id, numbers):
-    """"
-    Triggers a conference call
-
-    :param room_id: identify the target room
-    :type room_id: ``str``
-
-    :param numbers: a list of phone numbers to call
-    :type numbers: ``list``
-
-    This function creates a conference call and adds phone participants
-    """
-    print("- adding a conference call")
-    update = { 'markdown': 'Arranging a conference call'}
-    post_update(room_id, update)
-
-    time.sleep(3)
-
-    update = { 'markdown': 'Call [+44 12 34 56 78](tel:+44-12-34-56-78) to join the conference call from any phone.'}
-    post_update(room_id, update)
-
-    for line in numbers:
-        print("- calling '{}'".format(line))
-        update = { 'markdown': 'Adding {} to the conference call'.format(line)}
-        post_update(room_id, update)
-
-    time.sleep(5)
-    return "Conference call will end when all participants will leave it"
-
 def send_sms(room_id, details):
     """"
     Sends a SMS to target people
@@ -430,11 +401,6 @@ def process_push(room_id):
                 type = 'application/octet-stream'
 
             update['files'] = (text, open(item['file'], 'rb'), type)
-
-        # conference call
-        #
-        if 'conference' in item:
-            call_conference(room_id, item['conference'])
 
         # send a SMS
         #
