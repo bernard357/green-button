@@ -59,19 +59,21 @@ bt.tn:
     type: "application/pdf"
     label: "Print and fill this form"
 
-    sms:
-      - message: "Second click on green button"
+    call:
       - number: "+352691496401"
       - from: "33644606827"
+      - url: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
 
   # third press of bt.tn
   #
   - markdown: |
         The button has been pressed again, so there may be a need for immediate collective review of the situation.
-        A conference call will be arranged right now. Pre-defined phone numbers will be called directly.
+        A telephone call is taking place right now. Pre-defined phone numbers will be called directly.
 
     conference:
-      - +3526914496401
+      - name: "War Room"
+      - number: "+352691496401"
+      - from: "33644606827"
 
   # fourth press of bt.tn
   #

@@ -297,6 +297,75 @@ def send_sms(room_id, details):
                                                    ', '.join(to_numbers))}
     post_update(room_id, update)
 
+def phone_call(room_id, details):
+    """"
+    Calls people
+
+    :param room_id: identify the target room
+    :type room_id: ``str``
+
+    :param details: what to send and to which numbers
+    :type details: ``list``
+
+    This function uses the Twilio API to send a SMS message to target people
+    """
+    print("- passing a phone call")
+
+    handle = TwilioRestClient(settings['TWILIO_ACCOUNT_SID'],
+                              settings['TWILIO_AUTH_TOKEN'])
+
+    url = ''
+    from_number = None
+    to_numbers = []
+
+    for line in details:
+        if not isinstance(line, dict):
+            print("- invalid statement: '{}'".format(str(line)))
+            update = { 'markdown': 'Unable to send a SMS - check configuration'}
+            post_update(room_id, update)
+            return
+
+        if line.keys()[0] == 'url':
+            url = line['url']
+
+        if line.keys()[0] == 'from':
+            from_number = line['from']
+
+        if line.keys()[0] == 'number':
+            to_numbers.append(line['number'])
+
+    if len(url) < 4:
+        print("- url should have at least 4 characters: '{}'".format(str(message)))
+        update = { 'markdown': 'No URL for the call - check configuration'}
+        post_update(room_id, update)
+        return
+
+    print("- using '{}'".format(url))
+
+    if len(to_numbers) < 1:
+        print("- no phone number has been defined")
+        update = { 'markdown': 'No target phone number for call - check configuration'}
+        post_update(room_id, update)
+        return
+
+    if from_number is None:
+        from_number = to_numbers[0]
+
+    for number in to_numbers:
+        print("- calling '{}'".format(number))
+
+        try:
+            handle.calls.create(to=number,
+                                from_=from_number,
+                                url=url)
+
+            update = { 'markdown': "Calling '{}'".format(number)}
+            post_update(room_id, update)
+
+        except TwilioRestException as feedback:
+            print("- {}".format(str(feedback)))
+            return
+
 #
 # behaviour of this software robot
 #
@@ -371,6 +440,11 @@ def process_push(room_id):
         #
         if 'sms' in item:
             send_sms(room_id, item['sms'])
+
+        # phone call
+        #
+        if 'call' in item:
+            phone_call(room_id, item['call'])
 
     else:
         text = 'ping {}'.format(settings['count'])
