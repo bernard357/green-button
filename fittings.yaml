@@ -51,17 +51,12 @@ blueprints:
 
               write_files:
 
-                - path: /etc/profile.d/cisco_spark.sh
+                - path: /etc/profile.d/bttn_spark.sh
                   permissions: "0755"
                   content: |
                     #!/bin/sh
                     export CISCO_SPARK_BTTN_BOT="{{ environment.CISCO_SPARK_BTTN_BOT }}"
                     export CISCO_SPARK_BTTN_MAN="{{ environment.CISCO_SPARK_BTTN_MAN }}"
-
-                - path: /etc/profile.d/twilio.sh
-                  permissions: "0755"
-                  content: |
-                    #!/bin/sh
                     export TWILIO_ACCOUNT_SID="{{ environment.TWILIO_ACCOUNT_SID }}"
                     export TWILIO_AUTH_TOKEN="{{ environment.TWILIO_AUTH_TOKEN }}"
 
