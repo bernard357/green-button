@@ -56,9 +56,9 @@ blueprints:
                   content: |
                     #!/bin/sh
                     export CISCO_SPARK_BTTN_BOT="{{ environment.CISCO_SPARK_BTTN_BOT }}"
-                    export CISCO_SPARK_BTTN_MAN="{{ environment.CISCO_SPARK_BTTN_MAN }}"
                     export TWILIO_ACCOUNT_SID="{{ environment.TWILIO_ACCOUNT_SID }}"
                     export TWILIO_AUTH_TOKEN="{{ environment.TWILIO_AUTH_TOKEN }}"
+                    export BTTN_URL="http://{{ node.public }}:8080/"
 
                 - path: /root/hosts.awk
                   content: |

@@ -1,21 +1,3 @@
-# the port from which this bot is getting requests from the internet
-#
-port: 8080
-
-# the name of the Cisco Spark room handled by this bot
-#
-room: "Green Power Demonstration"
-
-# the token that has been created for this bot should normally be set in
-# the environment but you can override the configuration below
-#
-# CISCO_SPARK_BTTN_BOT: "YWM2OEG4OGItNTQ5YS00MDU2LThkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtZWyY"
-
-# the email address of the first moderator should normally be set in
-# the environment but you can override the configuration below
-#
-# CISCO_SPARK_BTTN_MAN: "foo.bar@acme.com"
-
 # the sequence of responses given to each button press
 #
 bt.tn:
@@ -43,7 +25,11 @@ bt.tn:
 
   # second press of bt.tn
   #
-  - markdown: |
+  - sms:
+      - message: "Check Cisco Spark"
+      - number: "+352691496401"
+
+    markdown: |
         The button has been pressed again, so you may need more information on our processes.
         Reference information can be found here: [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM))
 
@@ -54,20 +40,14 @@ bt.tn:
     type: "application/pdf"
     label: "Print and fill this form"
 
-    sms:
-      - message: "Check Cisco Spark"
-      - number: "+352691496401"
-      - from: "33644606827"
-
   # third press of bt.tn
   #
-  - markdown: |
-        A real-time telephone call is taking place right now. Pre-defined phone numbers will be called directly.
-
-    call:
+  - call:
       - number: "+352691496401"
-      - from: "33644606827"
-      - url: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
+      - say: "Hello, please check Cisco Spark. There is an on-going escalation"
+
+    markdown: |
+        A real-time telephone call is taking place right now.
 
   # fourth press of bt.tn
   #
@@ -80,6 +60,62 @@ bt.tn:
   - file: files/spark.png
     type: "image/png"
     label: "Cisco Spark brings things and human beings together"
+
+
+# Cisco Spark settings
+#
+spark:
+
+    # the name of the Cisco Spark room
+    #
+    room: "Green Power Demonstration"
+
+    # pre-defined moderators
+    #
+    moderators:
+      - bernard.paques@dimensiondata.com
+      - nemo.verbist@dimensiondata.com
+
+    # pre-defined participants
+    #
+    participants:
+      - laurent.vogt@dimensiondata.com
+      - david.hubert@dimensiondata.com
+
+    # the token that has been created for this bot should normally be set in
+    # the environment but you can override the configuration below
+    #
+    # CISCO_SPARK_BTTN_BOT: "<token here hkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtyY>"
+
+
+# Twilio settings
+#
+twilio:
+
+    # customer service number
+    #
+    customer_service_number: "33644606827"
+
+    # the account sid from https://www.twilio.com/console
+    #
+    # TWILIO_ACCOUNT_SID: "<sid_here>"
+
+    # the authentication token from https://www.twilio.com/console
+    #
+    # TWILIO_AUTH_TOKEN: "<token_here>"
+
+
+# server settings
+#
+server:
+
+    # the port from which this bot is getting requests from the internet
+    #
+    port: 8080
+
+    # the url that is used to access this server remotely, e.g. with ngrok
+    #
+    #url: "http://b2db306e.ngrok.io/"
 
 
 

@@ -8,8 +8,9 @@ import sys
 import time
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient
+import twilio.twiml
 import yaml
-from bottle import route, run, request, abort
+from bottle import route, run, request, abort, response
 
 
 # from bt.tn -- index page is triggered by the button itself
@@ -30,7 +31,7 @@ def from_bttn():
 
         process_push(room_id)
 
-        return "OK\n"
+        return "OK {}\n".format(settings['count'])
 
     except Exception as feedback:
         print("ABORTED: fatal error has been encountered")
@@ -51,10 +52,10 @@ def get_room():
     This function creates a new room if necessary
     """
 
-    print("Looking for Cisco Spark room '{}'".format(settings['room']))
+    print("Looking for Cisco Spark room '{}'".format(settings['spark']['room']))
 
     url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
+    headers = {'Authorization': 'Bearer '+settings['spark']['CISCO_SPARK_BTTN_BOT']}
     response = requests.get(url=url, headers=headers)
 
     if response.status_code != 200:
@@ -62,7 +63,7 @@ def get_room():
         raise Exception("Received error code {}".format(response.status_code))
 
     for item in response.json()['items']:
-        if settings['room'] in item['title']:
+        if settings['spark']['room'] in item['title']:
             print("- found it")
             return item['id']
 
@@ -83,8 +84,8 @@ def create_room():
     print("Creating Cisco Spark room")
 
     url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
-    payload = {'title': settings['room'] }
+    headers = {'Authorization': 'Bearer '+settings['spark']['CISCO_SPARK_BTTN_BOT']}
+    payload = {'title': settings['spark']['room'] }
     response = requests.post(url=url, headers=headers, data=payload)
 
     if response.status_code != 200:
@@ -105,10 +106,10 @@ def delete_room():
     This function is useful to restart a clean demo environment
     """
 
-    print("Deleting Cisco Spark room '{}'".format(settings['room']))
+    print("Deleting Cisco Spark room '{}'".format(settings['spark']['room']))
 
     url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
+    headers = {'Authorization': 'Bearer '+settings['spark']['CISCO_SPARK_BTTN_BOT']}
     response = requests.get(url=url, headers=headers)
 
     if response.status_code != 200:
@@ -118,12 +119,11 @@ def delete_room():
     actual = False
     for item in response.json()['items']:
 
-        if settings['room'] in item['title']:
-            print("- found it")
+        if settings['spark']['room'] in item['title']:
             print("- DELETING IT")
 
             url = 'https://api.ciscospark.com/v1/rooms/{}'.format(item['id'])
-            headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
+            headers = {'Authorization': 'Bearer '+settings['spark']['CISCO_SPARK_BTTN_BOT']}
             response = requests.delete(url=url, headers=headers)
 
             if response.status_code != 204:
@@ -143,23 +143,46 @@ def add_audience(room_id):
     :param room_id: identify the target room
     :type room_id: ``str``
 
-    This function adds pre-defined listeners to a Cisco Spark room if necessary
+    This function adds pre-defined listeners to a Cisco Spark room
     """
 
-    print("Adding moderator to the Cisco Spark room")
+    print("Adding moderators to the Cisco Spark room")
+
+    for item in settings['spark'].get('moderators', ()):
+        print("- {}".format(item))
+        add_person(room_id, person=item, isModerator='true')
+
+    print("Adding participants to the Cisco Spark room")
+
+    for item in settings['spark'].get('participants', ()):
+        print("- {}".format(item))
+        add_person(room_id, person=item)
+
+def add_person(room_id, person=None, isModerator='false'):
+    """
+    Adds a person to a room
+
+    :param room_id: identify the target room
+    :type room_id: ``str``
+
+    :param person: e-mail address of the person to add
+    :type person: ``str``
+
+    :param isModerator: for medrators
+    :type isModerator: `true` or `false`
+
+    """
 
     url = 'https://api.ciscospark.com/v1/memberships'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
+    headers = {'Authorization': 'Bearer '+settings['spark']['CISCO_SPARK_BTTN_BOT']}
     payload = {'roomId': room_id,
-               'personEmail': settings['CISCO_SPARK_BTTN_MAN'],
-               'isModerator': 'true' }
+               'personEmail': person,
+               'isModerator': isModerator }
     response = requests.post(url=url, headers=headers, data=payload)
 
     if response.status_code != 200:
         print(response.json())
         raise Exception("Received error code {}".format(response.status_code))
-
-    print("- done")
 
 def post_update(room_id, update):
     """
@@ -178,7 +201,7 @@ def post_update(room_id, update):
     print("Posting update to Cisco Spark room")
 
     url = 'https://api.ciscospark.com/v1/messages'
-    headers = {'Authorization': 'Bearer '+settings['CISCO_SPARK_BTTN_BOT']}
+    headers = {'Authorization': 'Bearer '+settings['spark']['CISCO_SPARK_BTTN_BOT']}
 
     if isinstance(update, dict):
         update['roomId'] = room_id
@@ -213,11 +236,11 @@ def send_sms(room_id, details):
     """
     print("- sending a SMS")
 
-    handle = TwilioRestClient(settings['TWILIO_ACCOUNT_SID'],
-                              settings['TWILIO_AUTH_TOKEN'])
+    handle = TwilioRestClient(settings['twilio']['TWILIO_ACCOUNT_SID'],
+                              settings['twilio']['TWILIO_AUTH_TOKEN'])
 
     message = ''
-    from_number = None
+    from_number = settings['twilio']['customer_service_number']
     to_numbers = []
 
     for line in details:
@@ -283,22 +306,26 @@ def phone_call(room_id, details):
     """
     print("- passing a phone call")
 
-    handle = TwilioRestClient(settings['TWILIO_ACCOUNT_SID'],
-                              settings['TWILIO_AUTH_TOKEN'])
+    handle = TwilioRestClient(settings['twilio']['TWILIO_ACCOUNT_SID'],
+                              settings['twilio']['TWILIO_AUTH_TOKEN'])
 
     url = ''
-    from_number = None
+    from_number = settings['twilio']['customer_service_number']
     to_numbers = []
+    say = ''
 
     for line in details:
         if not isinstance(line, dict):
             print("- invalid statement: '{}'".format(str(line)))
-            update = { 'markdown': 'Unable to send a SMS - check configuration'}
+            update = { 'markdown': 'Unable to call - check configuration'}
             post_update(room_id, update)
             return
 
         if line.keys()[0] == 'url':
             url = line['url']
+
+        if line.keys()[0] == 'say':
+            settings['twilio']['say'] = line['say']
 
         if line.keys()[0] == 'from':
             from_number = line['from']
@@ -307,10 +334,12 @@ def phone_call(room_id, details):
             to_numbers.append(line['number'])
 
     if len(url) < 4:
-        print("- url should have at least 4 characters: '{}'".format(str(message)))
-        update = { 'markdown': 'No URL for the call - check configuration'}
-        post_update(room_id, update)
-        return
+        if 'url' not in settings['server']:
+            print("- missing url: configuration information")
+            update = { 'markdown': 'No URL for the call - check configuration'}
+            post_update(room_id, update)
+            return
+        url = settings['server']['url'].rstrip('/')+'/call'
 
     print("- using '{}'".format(url))
 
@@ -337,6 +366,24 @@ def phone_call(room_id, details):
         except TwilioRestException as feedback:
             print("- {}".format(str(feedback)))
             return
+
+@route("/call", method=['GET', 'POST'])
+def inbound_call():
+    """
+    handles an inbound phone call
+
+    This function is called from twilio cloud back-end
+    """
+
+    print("Receiving inbound call")
+
+    response.content_type = 'text/xml'
+
+    behaviour = twilio.twiml.Response()
+    say = settings['twilio'].get('say', "What's up Doc?")
+    behaviour.say(say)
+    return str(behaviour)
+
 
 #
 # behaviour of this software robot
@@ -366,7 +413,7 @@ def process_push(room_id):
 
     items = settings['bt.tn']
     if settings['count'] < len(items):
-        print("- using item {}".format(settings['count']))
+        print("- using item {}".format(settings['count']+1))
         item = items[ settings['count'] ]
 
         update = {'text': ''}
@@ -434,50 +481,6 @@ def configure(name="settings.yaml"):
     The function loads configuration from the file and from the environment.
     Port number can be set from the command line.
 
-    Sample configuration file to illustrate capabilities of the program::
-
-        room: "Green Forge"
-
-        CISCO_SPARK_BTTN_BOT: "YWM2OEG4OGItNTQ5YS00MDU2LThkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtZWyY"
-        CISCO_SPARK_BTTN_MAN: "foo.bar@acme.com"
-
-        port: 8080
-
-        bt.tn:
-
-          - markdown: |
-                Green Power has been invoked again
-                ==================================
-
-                The [green button](https://d2jaw3pqpetn6l.cloudfront.net/app/uploads/2016/05/27125600/product-images-bttn-normal-green-600x600.jpg) has been pressed, so there is a need for urgent action.
-
-                Some context to this event: *Italic*, **bold**, and `monospace`.
-                Itemized lists look like this:
-
-                  * this one
-                  * that one
-                  * the other one
-
-                Unicode is supported. \xe2 And [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM)) too.
-                Call Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) if people are late to join this room.
-                We will continue to feed this room with information.
-
-          - file: IncidentReportForm.pdf
-            type: "application/pdf"
-            label: "Print and fill this report"
-
-          - file: bt.tn.png
-            type: "image/png"
-            label: "European buttons that rock"
-
-          - file: spark.png
-            type: "image/png"
-            label: "Cisco Spark brings things and human beings together"
-
-          - file: dimension-data.png
-            type: "image/png"
-            label: "Build new integrated systems and manage them"
-
     """
 
     print("Loading the configuration")
@@ -490,12 +493,62 @@ def configure(name="settings.yaml"):
             logging.error(str(feedback))
             sys.exit(1)
 
-    if "room" not in settings:
-        logging.error("Missing room: configuration information")
-        sys.exit(1)
+    settings['count'] = 0
 
     if "bt.tn" not in settings:
         logging.error("Missing bt.tn: configuration information")
+        sys.exit(1)
+
+    if len(settings['bt.tn']) < 1:
+        logging.error("Missing bt.tn: actions in configuration")
+        sys.exit(1)
+
+
+    if "spark" not in settings:
+        logging.error("Missing spark: configuration information")
+        sys.exit(1)
+
+    if "room" not in settings['spark']:
+        logging.error("Missing room: configuration information")
+        sys.exit(1)
+
+    if "moderators" not in settings['spark']:
+        logging.error("Missing moderators: configuration information")
+        sys.exit(1)
+
+    if 'CISCO_SPARK_BTTN_BOT' not in settings['spark']:
+        token = os.environ.get('CISCO_SPARK_BTTN_BOT')
+        if token is None:
+            logging.error("Missing CISCO_SPARK_BTTN_BOT in the environment")
+            sys.exit(1)
+        settings['spark']['CISCO_SPARK_BTTN_BOT'] = token
+
+
+    if "twilio" not in settings:
+        logging.error("Missing twilio: configuration information")
+        sys.exit(1)
+
+    if "customer_service_number" not in settings['twilio']:
+        logging.error("Missing customer_service_number: configuration information")
+        sys.exit(1)
+
+    if 'TWILIO_ACCOUNT_SID' not in settings['twilio']:
+        token = os.environ.get('TWILIO_ACCOUNT_SID')
+        if token is None:
+            logging.error("Missing TWILIO_ACCOUNT_SID in the environment")
+            sys.exit(1)
+        settings['twilio']['TWILIO_ACCOUNT_SID'] = token
+
+    if 'TWILIO_AUTH_TOKEN' not in settings['twilio']:
+        token = os.environ.get('TWILIO_AUTH_TOKEN')
+        if token is None:
+            logging.error("Missing TWILIO_AUTH_TOKEN in the environment")
+            sys.exit(1)
+        settings['twilio']['TWILIO_AUTH_TOKEN'] = token
+
+
+    if "server" not in settings:
+        logging.error("Missing server: configuration information")
         sys.exit(1)
 
     if len(sys.argv) > 1:
@@ -504,11 +557,18 @@ def configure(name="settings.yaml"):
         except:
             logging.error("Invalid port_number specified")
             sys.exit(1)
-    elif "port" in settings:
-        port_number = int(settings["port"])
+    elif "port" in settings['server']:
+        port_number = int(settings['server']['port'])
     else:
         port_number = 80
-    settings['port'] = port_number
+    settings['server']['port'] = port_number
+
+    if 'url' not in settings['server']:
+        url = os.environ.get('BTTN_URL')
+        if url is None:
+            logging.error("Missing BTTN_URL in the environment")
+            sys.exit(1)
+        settings['server']['url'] = url
 
     if 'DEBUG' in settings:
         debug = settings['DEBUG']
@@ -517,36 +577,6 @@ def configure(name="settings.yaml"):
     settings['DEBUG'] = debug
     if debug:
         logging.basicConfig(level=logging.DEBUG)
-
-    if 'CISCO_SPARK_BTTN_BOT' not in settings:
-        token = os.environ.get('CISCO_SPARK_BTTN_BOT')
-        if token is None:
-            logging.error("Missing CISCO_SPARK_BTTN_BOT in the environment")
-            sys.exit(1)
-        settings['CISCO_SPARK_BTTN_BOT'] = token
-
-    if 'CISCO_SPARK_BTTN_MAN' not in settings:
-        emails = os.environ.get('CISCO_SPARK_BTTN_MAN')
-        if emails is None:
-            logging.error("Missing CISCO_SPARK_NTTN_MAN in the environment")
-            sys.exit(1)
-        settings['CISCO_SPARK_BTTN_MAN'] = emails
-
-    if 'TWILIO_ACCOUNT_SID' not in settings:
-        token = os.environ.get('TWILIO_ACCOUNT_SID')
-        if token is None:
-            logging.error("Missing TWILIO_ACCOUNT_SID in the environment")
-            sys.exit(1)
-        settings['TWILIO_ACCOUNT_SID'] = token
-
-    if 'TWILIO_AUTH_TOKEN' not in settings:
-        token = os.environ.get('TWILIO_AUTH_TOKEN')
-        if token is None:
-            logging.error("Missing TWILIO_AUTH_TOKEN in the environment")
-            sys.exit(1)
-        settings['TWILIO_AUTH_TOKEN'] = token
-
-    settings['count'] = 0
 
     return settings
 
@@ -566,6 +596,6 @@ if __name__ == "__main__":
     #
     print("Preparing for web requests")
     run(host='0.0.0.0',
-        port=settings['port'],
+        port=settings['server']['port'],
         debug=settings['DEBUG'],
         server=os.environ.get('SERVER', "auto"))
