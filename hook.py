@@ -26,19 +26,10 @@ def from_bttn():
 
     try:
 
-        # step 1 - get a room, or create one if needed
-        #
         room_id = get_room()
 
-        # step 2 - ensure they are some listeners here
-        #
-        add_audience(room_id)
-
-        # step 3 - process the action
-        #
         process_push(room_id)
 
-        print("Cisco Spark has been updated")
         return "OK\n"
 
     except Exception as feedback:
@@ -76,6 +67,19 @@ def get_room():
             return item['id']
 
     print("- not found")
+
+    return create_room()
+
+def create_room():
+    """
+    Creates a new Cisco Spark room
+
+    :return: the id of the target room
+    :rtype: ``str``
+
+    This function also adds appropriate audience to the room
+    """
+
     print("Creating Cisco Spark room")
 
     url = 'https://api.ciscospark.com/v1/rooms'
@@ -88,7 +92,11 @@ def get_room():
         raise Exception("Received error code {}".format(response.status_code))
 
     print("- done")
-    return response.json()['id']
+    room_id = response.json()['id']
+
+    add_audience(room_id)
+
+    return room_id
 
 def delete_room():
     """
@@ -128,8 +136,6 @@ def delete_room():
     else:
         print("- no room with this name yet - it will be created on next button depress")
 
-    settings['shouldAddModerator'] = True
-
 def add_audience(room_id):
     """
     Gives a chance to some listeners to catch updates
@@ -139,9 +145,6 @@ def add_audience(room_id):
 
     This function adds pre-defined listeners to a Cisco Spark room if necessary
     """
-
-    if settings['shouldAddModerator'] is False:
-        return
 
     print("Adding moderator to the Cisco Spark room")
 
@@ -157,8 +160,6 @@ def add_audience(room_id):
         raise Exception("Received error code {}".format(response.status_code))
 
     print("- done")
-
-    settings['shouldAddModerator'] = False
 
 def post_update(room_id, update):
     """
@@ -412,6 +413,8 @@ def process_push(room_id):
         if 'call' in item:
             phone_call(room_id, item['call'])
 
+    # ping message
+    #
     else:
         text = 'ping {}'.format(settings['count'])
         update = text
