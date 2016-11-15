@@ -1,7 +1,7 @@
 ---
 
 information:
-  - "Green Button web endpoint"
+  - "Green Button, the thing that fosters interactions between people"
 
 ---
 
@@ -16,21 +16,19 @@ blueprints:
         ipv4: auto
 
       ethernet:
-        name: GreenPowerNetwork
+        name: GreenButtonNetwork
         subnet: 10.90.45.0
 
       nodes:
         - bttn-01:
 
-            description: "Web endpoint for bt.tn cloud"
-
             information:
-              - "To activate the server:"
-              - "ssh ubuntu@{{ node.public }}"
-              - "cd bt.tn-spark"
-              - "python hook.py"
               - "Ask bt.tn to perform a web request here:"
               - "http://{{ node.public }}:8080"
+              - "Add a button with new settings file:"
+              - "ssh ubuntu@{{ node.public }}"
+              - "cd bt.tn-spark/buttons"
+              - "restart bttn_spark"
 
             appliance: 'Ubuntu 14'
 
@@ -50,6 +48,33 @@ blueprints:
                 - python-pip
 
               write_files:
+
+                - path: /etc/init/bttn_spark.conf
+                  permissions: "0755"
+                  content: |
+                      description "bt.tn service"
+
+                      start on runlevel [234]
+                      stop on runlevel [0156]
+
+                      setuid ubuntu
+
+                      env CISCO_SPARK_BTTN_BOT="{{ environment.CISCO_SPARK_BTTN_BOT }}"
+                      export CISCO_SPARK_BTTN_BOT
+
+                      env TWILIO_ACCOUNT_SID="{{ environment.TWILIO_ACCOUNT_SID }}"
+                      export TWILIO_ACCOUNT_SID
+
+                      env TWILIO_AUTH_TOKEN="{{ environment.TWILIO_AUTH_TOKEN }}"
+                      export TWILIO_AUTH_TOKEN
+
+                      env BTTN_URL="http://{{ node.public }}:8080/"
+                      export BTTN_URL
+
+                      script
+                          cd /home/ubuntu/bt.tn-spark
+                          python hook.py
+                      end script
 
                 - path: /etc/profile.d/bttn_spark.sh
                   permissions: "0755"
@@ -88,6 +113,10 @@ blueprints:
                 - git clone https://github.com/bernard357/bt.tn-spark.git
                 - cd bt.tn-spark/
                 - pip install -r requirements.txt
+
+                - echo "===== Starting bt.tn-spark as a daemon service"
+                - chown ubuntu:ubuntu -R /home/ubuntu
+                - start bttn_spark
 
               hostname: "{{ node.name }}"
 
