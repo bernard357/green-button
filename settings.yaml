@@ -1,86 +1,6 @@
-# the sequence of responses given to each button press
-#
-bt.tn:
-
-  # first press of bt.tn
-  #
-  - markdown: |
-        Green Power has been invoked again
-        ==================================
-
-        The [green button](https://d2jaw3pqpetn6l.cloudfront.net/app/uploads/2016/05/27125600/product-images-bttn-normal-green-600x600.jpg) has been pressed, so there is a need for collective action.
-
-        Some context to this event: *Italic*, **bold**, and `monospace`.
-        Itemized lists look like this:
-
-          * this one
-          * that one
-          * the other one
-
-        Unicode is supported. ㋡ Presss the button again to transition to next level of assistance.
-
-    file: files/dashboard.png
-    type: "image/png"
-    label: "Current status of the server"
-
-  # second press of bt.tn
-  #
-  - sms:
-      - message: "Check Cisco Spark"
-      - number: "+352691496401"
-
-    markdown: |
-        The button has been pressed again, so you may need more information on our processes.
-        Reference information can be found here: [Incident Management](https://en.wikipedia.org/wiki/Incident_management_(ITSM))
-
-        Aside from information already shared in this room, you may want to capture more facts and share these with us.
-        Please print and fill the form below. Call our Global Service Center at [+44 12 34 56 78](tel:+44-12-34-56-78) for any real-time assistance you may need. Press the button again to escalate.
-
-    file: files/IncidentReportForm.pdf
-    type: "application/pdf"
-    label: "Print and fill this form"
-
-  # third press of bt.tn
-  #
-  - call:
-      - number: "+352691496401"
-      - say: "Hello, please check Cisco Spark. There is an on-going escalation"
-
-    markdown: |
-        A real-time telephone call is taking place right now.
-
-  # fourth press of bt.tn
-  #
-  - file: files/dimension-data.png
-    type: "image/png"
-    label: "Build new integrated systems and manage them"
-
-  # fifth press of bt.tn
-  #
-  - file: files/spark.png
-    type: "image/png"
-    label: "Cisco Spark brings things and human beings together"
-
-
 # Cisco Spark settings
 #
 spark:
-
-    # the name of the Cisco Spark room
-    #
-    room: "Green Power Demonstration"
-
-    # pre-defined moderators
-    #
-    moderators:
-      - bernard.paques@dimensiondata.com
-      - nemo.verbist@dimensiondata.com
-
-    # pre-defined participants
-    #
-    participants:
-      - laurent.vogt@dimensiondata.com
-      - david.hubert@dimensiondata.com
 
     # the token that has been created for this bot should normally be set in
     # the environment but you can override the configuration below
@@ -116,6 +36,10 @@ server:
     # the url that is used to access this server remotely, e.g. with ngrok
     #
     #url: "http://b2db306e.ngrok.io/"
+
+    # default button settings if not id is provided
+    #
+    default: incident.yaml
 
 
 

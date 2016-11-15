@@ -1,0 +1,78 @@
+# In this use case the button triggers interactions with sales and pre-sales team
+#
+# A permanent room is created in Cisco Spark so that client and provider can interact
+# at will, and preserve context information over time
+#
+# When client pushes the button a notification is sent to the room, and a SMS
+# to sales person. The client goes to the room and asks a question or submits an idea,
+# either before or after a push on the button. If the provider joins the room on SMS,
+# he can stick to the chat room or even switch to audio/video interaction with the client.
+#
+# When client pushes the button a second time within some minutes, then a voice call
+# is made to the sales person. The sales person knows that there is an urgent case
+# to handle, and can either move to the room, send a SMS, or find other ways to
+# interact with the client.
+#
+# Benefits for the client:
+# - easy channel for questions and requests submitted to the provider
+# - blur difference between synchronous/asynchronous interactions
+# - preserve history of exchanges in the room itself
+# - arrange on-demand interactions with provider
+#
+# Benefits for the provider:
+# - easy channel for questions and requests from the client
+# - put your face on the button, so you stay visible on the desk of your client
+# - provide good experience through synchronous and asynchronous interactions
+# - invite expert or any colleague on difficult case so that you are orchestrating a team
+#
+bt.tn:
+
+  # first press of bt.tn
+  #
+  - markdown: |
+        Question or request thread
+        ==========================
+
+        This is the right place to submit a request, or to post a question.
+        Attach any document that may be useful for the swift handling of it.
+
+    file: files/question.png
+    type: "image/png"
+    label: "question thread"
+
+    sms:
+      - message: "Check Cisco Spark"
+      - number: "+352691496401"
+
+  # second press of bt.tn
+  #
+  - call:
+      - number: "+352691496401"
+      - say: "Hello, there is an immediate question from your client. Please check Cisco Spark"
+
+    markdown: |
+        A real-time telephone call is taking place right now.
+
+# Cisco Spark settings
+#
+spark:
+
+    # the name of the Cisco Spark room
+    #
+    room: "Green Box for Questions"
+
+    # pre-defined moderators
+    #
+    moderators:
+      - bernard.paques@dimensiondata.com
+#      - nemo.verbist@dimensiondata.com
+
+    # pre-defined participants
+    #
+#    participants:
+#      - laurent.vogt@dimensiondata.com
+#      - david.hubert@dimensiondata.com
+
+    # number of minutes to reset the full cycle of the button
+    #
+    reset: 20
