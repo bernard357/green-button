@@ -24,15 +24,6 @@ web = Bottle()
 #
 
 @web.route("/", method=['GET', 'POST'])
-def web_index():
-    """
-    Processes the press of a bt.tn device
-
-    This function is called from far far away, over the Internet
-    """
-
-    web_press()
-
 @web.route("/<button>", method=['GET', 'POST'])
 def web_press(button=None):
     """
@@ -472,7 +463,7 @@ def phone_call(context, details):
             update = { 'markdown': 'No URL for the call - check configuration'}
             post_update(context, update)
             return
-        url = context['server']['url'].rstrip('/')+'/call'
+        url = context['server']['url'].rstrip('/')+'/call/'.context['name']
 
     logging.info("- using '{}'".format(url))
 
@@ -500,20 +491,26 @@ def phone_call(context, details):
             logging.info("- {}".format(str(feedback)))
             return
 
-@route("/call", method=['GET', 'POST'])
-def inbound_call():
+@web.route("/call", method=['GET', 'POST'])
+@web.route("/call/<button>", method=['GET', 'POST'])
+def web_inbound_call(button=None):
     """
-    handles an inbound phone call
+    Handles an inbound phone call
 
     This function is called from twilio cloud back-end
     """
 
-    logging.info("Receiving inbound call")
+    if button is None:
+        button = settings['server']['default']
+
+    logging.info("Receiving inbound call for button {}".format(button))
+
+    context = load_button(settings, button)
 
     response.content_type = 'text/xml'
 
     behaviour = twilio.twiml.Response()
-    say = settings['twilio'].get('say', "What's up Doc?")
+    say = context['twilio'].get('say', "What's up Doc?")
     behaviour.say(say)
     return str(behaviour)
 
