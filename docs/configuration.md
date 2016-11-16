@@ -6,18 +6,13 @@ You do not need to be a software developer to use this bot. There is one general
 
 In this use case the button triggers interactions with support and delivery team.
 
-A permanent room is created in Cisco Spark so that client and provider can interact
-at will, and preserve context information over time.
+Alice says to Bob: you already know managed services from Dimension Data. Here is a new way to engage with us. Press the button when needed, and our teams will interact over a Cisco Spark room and over mobile phones.
 
-When client pushes the button a notification is sent to the room, and a SMS
-to sales person. The client goes to the room and asks a question or submits an idea,
-either before or after a push on the button. If the provider joins the room on SMS,
-he can stick to the chat room or even switch to audio/video interaction with the client.
+1- Bob has a problem, and presses the button.  This creates a room, adds some people from the teams of Alice and of Bob, and pushes some content to it.  Interactions can start asynchronously with chat and files. When people enter the room they can discuss and move forward.
 
-When client pushes the button a second time within some minutes, then a voice call
-is made to the sales person. The sales person knows that there is an urgent case
-to handle, and can either move to the room, send a SMS, or find other ways to
-interact with the client.
+2- If people in the team of Alice are too busy they may not pop up immediately. In that case, Bob presses the button a second time. This sends SMS to Alice, and that action is recorded in the room.
+
+3- A third press on the button  triggers a phone call to Alice, so that she is invited to join the room immediately.
 
 ```yaml
 bt.tn:
@@ -108,19 +103,15 @@ spark:
 
 In this use case the button triggers interactions with sales and pre-sales team.
 
-A permanent room is created in Cisco Spark so that client and provider can interact
-at will, and preserve context information over time
+Alice says to Bob: as a client manager I would like to be as close as possible to my client to move from assist to advise. Each time you want to share ideas or topics, press this button and we will interact over a Cisco Spark room
 
-When client pushes the button a notification is sent to the room, and a SMS
-to sales person. The client goes to the room and asks a question or submits an idea,
-either before or after a push on the button. If the provider joins the room on SMS,
-he can stick to the chat room or even switch to audio/video interaction with the client.
+A permanent room is created in Cisco Spark so that Alice and Bob, and their teams, can interact at will.
 
-When client pushes the button a second time within some minutes, then a voice call
-is made to the sales person. The sales person knows that there is an urgent case
-to handle, and can either move to the room, send a SMS, or find other ways to
-interact with the client.
+When Bob pushes the button a notification is sent to the room, and a SMS to Alice. Bob goes to the room and asks a question or submits an idea. If Alice joins the room on SMS, she can stick to the chat room or even switch to audio/video interaction with Bob.
 
+When Bob pushes the button a second time within some minutes, then a voice call is made to Alice. Then Alice knows that there is an urgent case# to handle. She can either move to the room, send a SMS, or find other ways to satisfy Bob.
+
+After some minutes the system is reset, ready for next transaction. The room preserves context information over time.
 
 ```yaml
 bt.tn:
