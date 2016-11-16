@@ -106,7 +106,7 @@ class HookTests(unittest.TestCase):
 
         print('***** Test incident script ***')
 
-        from hook import configure, load_button, handle_button
+        from hook import configure, load_button, handle_button, delete_room
         settings = configure('settings.yaml')
         context = load_button(settings, name='incident')
         self.assertTrue(isinstance(context, dict))
@@ -129,13 +129,15 @@ class HookTests(unittest.TestCase):
 
         self.assertEqual(context['count'], 4)
 
+        delete_room(context)
+
     @mock.patch('hook.send_sms', return_value='pumpkins')
     @mock.patch('hook.phone_call', return_value='pumpkins')
     def test_request(self, send_sms_patch, phone_call_patch):
 
         print('***** Test request script ***')
 
-        from hook import configure, load_button, handle_button
+        from hook import configure, load_button, handle_button, delete_room
         settings = configure('settings.yaml')
         context = load_button(settings, name='request')
         self.assertTrue(isinstance(context, dict))
@@ -150,6 +152,7 @@ class HookTests(unittest.TestCase):
 
         self.assertEqual(context['count'], 2)
 
+        delete_room(context)
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)
