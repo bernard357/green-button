@@ -11,11 +11,13 @@ With the Green Button project we show evidence of things and people interacting 
 IoT and digital transformation have been buzzwords for a while.
 You can find countless presentations and documents on these topics, but what do they really mean to us?
 
-## How to do this?
-
 This is a contribution to the global community of IoT and digital practitioners. You can use it either to demonstrate what is possible today, or even to provide VIP services to selected clients.
 
-This project has been named 'The Green Button' by reference to the corporate color of Dimension Data, where the project was born. It features a physical button, and four different clouds. We selected a standard button from an European company called [bt.tn](https://bt.tn/). The full project, including the software, documentation and reference configuration files,  have been released as an open-source project on GitHub, so that any person can use it and contribute. Cisco Spark provides the interaction back-end. Twilio is used for SMS and phone calls.
+## How to do this?
+
+The system has one or several physical buttons, and four different clouds. We selected a standard button from an European company called [bt.tn](https://bt.tn/). The full project, including the software, documentation and reference configuration files,  have been released as an open-source project on GitHub, so that any person can use it and contribute. Cisco Spark provides the interaction back-end. Twilio is used for SMS and phone calls.
+
+This project has been named 'The Green Button' by reference to the corporate color of Dimension Data, where the project was born.
 
 ## What do you need to run this bot?
 
