@@ -37,9 +37,9 @@ server:
     #
     #url: "http://b2db306e.ngrok.io/"
 
-    # default button settings if not id is provided
+    # default button id if no information is provided over the wire
     #
-    default: incident.yaml
+    default: incident
 
 
 
