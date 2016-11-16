@@ -51,7 +51,7 @@ def handle_button(context):
     """
     try:
 
-        context['spark']['room_id'] = get_room(context)
+        context['spark']['id'] = get_room(context)
 
         process_push(context)
 
@@ -174,7 +174,7 @@ def get_room(context):
     for item in response.json()['items']:
         if context['spark']['room'] in item['title']:
             logging.info("- found it")
-            context['spark']['room_id'] = item['id']
+            context['spark']['id'] = item['id']
             return item['id']
 
     logging.info("- not found")
@@ -207,9 +207,9 @@ def create_room(context):
 
     logging.info("- done")
     room_id = response.json()['id']
-    context['spark']['room_id'] = get_room(context)
+    context['spark']['id'] = get_room(context)
 
-    add_audience(context, room_id)
+    add_audience(context)
 
     return room_id
 
@@ -271,15 +271,12 @@ def delete_room(context):
     else:
         logging.info("- no room with this name yet - it will be created on next button depress")
 
-def add_audience(context, room_id):
+def add_audience(context):
     """
     Gives a chance to some listeners to catch updates
 
     :param context: button state and configuration
     :type context: ``dict``
-
-    :param room_id: identify the target room
-    :type room_id: ``str``
 
     This function adds pre-defined listeners to a Cisco Spark room
     """
@@ -288,35 +285,32 @@ def add_audience(context, room_id):
 
     for item in context['spark'].get('moderators', ()):
         logging.info("- {}".format(item))
-        add_person(context, room_id, person=item, isModerator='true')
+        add_person(context, person=item, isModerator='true')
 
     logging.info("Adding participants to the Cisco Spark room")
 
     for item in context['spark'].get('participants', ()):
         logging.info("- {}".format(item))
-        add_person(context, room_id, person=item)
+        add_person(context, person=item)
 
-def add_person(context, room_id, person=None, isModerator='false'):
+def add_person(context, person=None, isModerator='false'):
     """
     Adds a person to a room
 
     :param context: button state and configuration
     :type context: ``dict``
 
-    :param room_id: identify the target room
-    :type room_id: ``str``
-
     :param person: e-mail address of the person to add
     :type person: ``str``
 
-    :param isModerator: for medrators
+    :param isModerator: for moderators
     :type isModerator: `true` or `false`
 
     """
 
     url = 'https://api.ciscospark.com/v1/memberships'
     headers = {'Authorization': 'Bearer '+context['spark']['CISCO_SPARK_BTTN_BOT']}
-    payload = {'roomId': room_id,
+    payload = {'roomId': context['spark']['id'],
                'personEmail': person,
                'isModerator': isModerator }
     response = requests.post(url=url, headers=headers, data=payload)
@@ -345,11 +339,11 @@ def post_update(context, update):
     headers = {'Authorization': 'Bearer '+context['spark']['CISCO_SPARK_BTTN_BOT']}
 
     if isinstance(update, dict):
-        update['roomId'] = context['spark']['room_id']
+        update['roomId'] = context['spark']['id']
         payload = MultipartEncoder(fields=update)
         headers['Content-Type'] = payload.content_type
     else:
-        payload = {'roomId': context['spark']['room_id'], 'text': update }
+        payload = {'roomId': context['spark']['id'], 'text': update }
 
     response = requests.post(url=url, headers=headers, data=payload)
 
