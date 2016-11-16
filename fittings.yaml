@@ -28,7 +28,7 @@ blueprints:
               - "Add a button with new settings file:"
               - "ssh ubuntu@{{ node.public }}"
               - "cd bt.tn-spark/buttons"
-              - "restart bttn_spark"
+              - "sudo restart bttn_spark"
 
             appliance: 'Ubuntu 14'
 
