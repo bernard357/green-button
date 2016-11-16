@@ -14,16 +14,20 @@
 # interact with the client.
 #
 # Benefits for the client:
-# - easy channel for questions and requests submitted to the provider
-# - blur difference between synchronous/asynchronous interactions
+# - easy way to bring people together on incident
+# - allow people to interact from mobile, tablet, laptop or web browser
+# - any expert can be added and provided with contextual information in the room
 # - preserve history of exchanges in the room itself
-# - arrange on-demand interactions with provider
+# - blur difference between synchronous/asynchronous interactions
+# - assistance is personalised from the beginning to the end
 #
 # Benefits for the provider:
+# - chat and visual feed-back are better than phone call and e-mail
 # - easy channel for questions and requests from the client
-# - put your face on the button, so you stay visible on the desk of your client
-# - provide good experience through synchronous and asynchronous interactions
-# - invite expert or any colleague on difficult case so that you are orchestrating a team
+# - single place to share unstructured information (logs, screenshots, etc.)
+# - ask any expert to join the room for contribution
+# - incident managers can monitor all interactions between people
+# - support both shared and dedicated organisation models
 #
 bt.tn:
 
