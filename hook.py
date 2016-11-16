@@ -213,6 +213,24 @@ def create_room(context):
 
     return room_id
 
+@web.route("/delete", method=['GET', 'POST'])
+@web.route("/delete/<button>", method=['GET', 'POST'])
+def web_delete(button=None):
+    """
+    Deletes a room
+
+    This function is called from far far away, over the Internet
+    """
+
+    if button is None:
+        button = settings['server']['default']
+
+    logging.info("Button {} has been pressed".format(button))
+
+    context = load_button(settings, button)
+
+    delete_room(context)
+
 def delete_room(context):
     """
     Deletes the target Cisco Spark room
