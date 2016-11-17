@@ -47,7 +47,7 @@ The Green Button can handle following actions:
 * send SMS over Twilio
 * call phone numbers over Twilio and say something
 
-Ready to go? Check [the configuration page](docs.configuration.md) for more details
+Ready to go? Check [the configuration page](docs/configuration.md) for more details
 
 ## Where to find additional assistance?
 
