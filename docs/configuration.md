@@ -2,7 +2,7 @@
 
 If you know how to modify a text file, then you can build the button that is perfectly adpated to your specific needs. There is one general configuration file for the server itself, and then one configuration file per button.
 
-The Green Button project is provided with sample configuration files for two buttons: `incident` and `request`. These are described below for reference. You are encouraged to duplicate on of these files in the directory `buttons` and to edit it.
+The Green Button project is provided with sample configuration files for two buttons: `incident` and `request`. These are described below for reference. You are encouraged to duplicate one of these files in the directory `buttons` and to edit it.
 
 For example, if you want to create a button named `urgent_123` that is derived from `incident`:
 * go to the `buttons` directory
