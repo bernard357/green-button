@@ -105,13 +105,13 @@ spark:
     #
     moderators:
       - bernard.paques@dimensiondata.com
-#      - nemo.verbist@dimensiondata.com
+      - foo.bar@acme.com
 
     # pre-defined participants
     #
-#    participants:
-#      - laurent.vogt@dimensiondata.com
-#      - david.hubert@dimensiondata.com
+    participants:
+      - laurent.mars@company.com
+      - expert1@apache.org
 
     # number of minutes to reset the full cycle of the button
     #
