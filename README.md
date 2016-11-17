@@ -1,6 +1,6 @@
 # The Green Button project
 
-Press a [bt.tn](https://bt.tn), multiple times, to foster digital interactions in [Cisco Spark](https://www.ciscospark.com/) and over [Twilio](https://www.twilio.com). This project implements a software robot (a bot) that turn signals received from the button to meaningful updates for the human beings.
+Press a [bt.tn](https://bt.tn), multiple times, to foster digital interactions in [Cisco Spark](https://www.ciscospark.com/) and over [Twilio](https://www.twilio.com). This project implements a software robot (a [bot](https://en.wikipedia.org/wiki/Internet_bot)) that turn signals received from the button to meaningful updates for the human beings.
 
 ![Architecture](docs/architecture.png)
 
