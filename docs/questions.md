@@ -8,14 +8,38 @@
 * credentials at [Twilio](https://www.twilio.com) to use their communication services (SMS and voice)
 * some [instructions](setup.md) and goodwill :-)
 
+If you are a Dimension Data employee, then you can benefit from the back-end that has been put in place for the project. Acquire a connected button and contact the Green Force group in Yammer.
+
 ## Can the bot support multiple buttons?
 
 Yes, a single web server can handle many buttons. Each button has its own separate configuration file, and is given a separate
-web address. So with this bot you can spread dozens of buttons and customize the behaviour of each of them.
+web address. So with this bot you can spread dozens of buttons and customize the behaviour of each of them separately from the others.
 
-## What can this bot really do?
+## How to install the full system?
 
-The bot can:
+Use [detailed instructions](setup.md) that explain what you have to do step by step.
+
+We are making the setup as easy as possible for Dimension Data employees, thanks to the back-end that has been put in place for the project. All you really need is a physical button. For the rest, contact the Green Force group in Yammer.
+
+## Is it required to know python?
+
+Fortunately not. The software robot uses separate configuration files that can be modified at will.
+
+Each button has its own configuration file in the directory `buttons`. The system is provided with
+two sample files named `buttons\incident.yaml` and `buttons\request.yaml`.
+You can modify these files, or create a separate file for a new button.
+
+Check the configuration file `settings.yaml` to specify general parameters, such the port used by the web server, etc.
+
+## Is it easy to configure a button?
+
+Yes, since the behaviour of each button is described in a separate configuration file.
+Some [examples](buttons) are provided so that you have something to start with.
+
+Configuration files are plain text files, where you describe in sequence what to do
+on first push of the button, on second push, etc.
+
+The Green Button can handle following actions:
 * create Cisco Spark rooms
 * add moderators and participants
 * upload binary files
@@ -23,22 +47,7 @@ The bot can:
 * send SMS over Twilio
 * call phone numbers over Twilio and say something
 
-## How to install the full system?
-
-Use [detailed instructions](setup.md) that explain what you have to do step by step.
-
-You do not need to be a software developer to use this bot. The behaviour of the bot is set in a straightforward configuration file named `settings.yaml`, so have a look at it and adapt it to your needs.
-The sample configuration file below provides a rather good idea of what this bot is capable of.
-
-## Is it required to know python?
-
-Fortunately not. The software robot uses separate configuration files that you can modify at will.
-
-Each button has its own configuration file in the directory `buttons`. The system is provided with
-two sample files named `buttons\incident.yaml` and `buttons\request.yaml`.
-You can modify these files, or create a separate file for a new button.
-
-Check the configuration file `settings.yaml` to specify general parameters, such the port used by the web server, etc.
+Ready to go? Check [the configuration page](docs.configuration.md) for more details
 
 ## Where is this project coming from?
 
