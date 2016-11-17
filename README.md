@@ -11,7 +11,7 @@ With the Green Button project we show evidence of things and people interacting 
 IoT and digital transformation have been buzzwords for a while.
 You can find countless presentations and documents on these topics, but what do they really mean to us?
 
-This is a contribution to the global community of IoT and digital practitioners. You can use it either to demonstrate what is possible today, or even to provide VIP services to selected clients.
+This is a contribution to the global community of IoT and digital practitioners. You can use it either to demonstrate what is possible today, or even to provide VIP services to selected clients. The Green Button project is ruled by the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
 
 ## How to do this?
 
