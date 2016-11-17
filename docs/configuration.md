@@ -7,12 +7,13 @@ The Green Button project is provided with sample configuration files for two but
 For example, if you want to create a button named `urgent_123` that is derived from `incident`:
 * go to the `buttons` directory
 * copy `incident.yaml` to `urgent_123.yaml`
-* edit `urgent_123.yaml` and adapt messages, files, people and phone number
+* edit `urgent_123.yaml` and adapt messages, files, people, phone numbers, etc.
 * save changes and use the button: `http://<server_url>/urgent_123`
 
 ## Sample configuration file for the button `incident`
 
 In this use case the button triggers interactions with support and delivery team.
+We consider that Alice is on provider side, and Bob is on client side.
 
 Alice says to Bob: you already know managed services from Dimension Data. Here is a new way to engage with us. Press the button when needed, and our teams will interact over a Cisco Spark room and over mobile phones.
 
@@ -112,14 +113,15 @@ spark:
 ## Sample configuration file for the button `request`
 
 In this use case the button triggers interactions with sales and pre-sales team.
+We consider that Alice is on provider side, and Bob is on client side.
 
-Alice says to Bob: as a client manager I would like to be as close as possible to my client to move from assist to advise. Each time you want to share ideas or topics, press this button and we will interact over a Cisco Spark room
+Alice says to Bob: as a client manager I would like to be as close to you as possible. Not only to assist you but to be part of your problems and to advise. Each time you want to share an idea of a concern, press the button and this will start a new thinking thread. The actual activity will take place on a Cisco Spark room.
 
 A permanent room is created in Cisco Spark so that Alice and Bob, and their teams, can interact at will.
 
-When Bob pushes the button a notification is sent to the room, and a SMS to Alice. Bob goes to the room and asks a question or submits an idea. If Alice joins the room on SMS, she can stick to the chat room or even switch to audio/video interaction with Bob.
+When Bob pushes the button a notification is sent to the room, and a SMS to Alice. Bob goes to the room and asks a question or submits an idea. If Alice joins the room on SMS, she can either use the chat area, or engage a virtual meeting with Bob, or both.
 
-When Bob pushes the button a second time within some minutes, then a voice call is made to Alice. Then Alice knows that there is an urgent case# to handle. She can either move to the room, send a SMS, or find other ways to satisfy Bob.
+When Bob pushes the button a second time within some minutes, then a voice call is made to Alice. Then Alice knows that there is an urgent case to handle. She can either move to the room, send a SMS, or find other ways to satisfy Bob. As soon as possible, Alice will join the room, review its content, and resync with Bob appropriately.
 
 After some minutes the system is reset, ready for next transaction. The room preserves context information over time.
 
