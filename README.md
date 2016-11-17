@@ -1,6 +1,6 @@
 # The Green Button project
 
-Press a bt.tn, multiple times, to foster digital interactions in Cisco Spark and over Twilio. This project implements a software robot (a bot) that turn signals received from the button to meaningful updates for the human beings.
+Press a [bt.tn](https://bt.tn), multiple times, to foster digital interactions in [Cisco Spark](https://www.ciscospark.com/) and over [Twilio](https://www.twilio.com). This project implements a software robot (a bot) that turn signals received from the button to meaningful updates for the human beings.
 
 ![Architecture](docs/architecture.png)
 
@@ -15,11 +15,11 @@ This is a contribution to the global community of IoT and digital practitioners.
 
 ## How to do this?
 
-The system has one or several physical buttons, and four different clouds. We selected a standard button from an European company called [bt.tn](https://bt.tn/). The full project, including the software, documentation and reference configuration files,  have been released as an open-source project on GitHub, so that any person can use it and contribute. Cisco Spark provides the interaction back-end. Twilio is used for SMS and phone calls.
+The system has one or several physical buttons, and four different clouds. We selected a standard button from an European company called [bt.tn](https://bt.tn/). The full project, including the software, documentation and reference configuration files,  have been released as an open-source project on GitHub, so that any person can use it and contribute. [Cisco Spark](https://www.ciscospark.com/) provides the interaction back-end. [Twilio](https://www.twilio.com) is used for SMS and phone calls.
 
-This project has been named 'The Green Button' by reference to the corporate color of Dimension Data, where the project was born.
+This project has been named 'The Green Button' by reference to the corporate color of Dimension Data, where the project was born. As you can expect, the deployment of the bot has been fully [orchestrated](fittings.yaml) on the [Managed Cloud Platform](http://www.dimensiondata.com/Global/Solutions/Cloud/) from Dimension Data. So, if you have MCP credentials, you can deploy the bot at more than 15 data centres world-wide, in 10 minutes. Please note that it is not required to use cloud services from Dimension Data. Instructions to install the bot at any Ubuntu box are also provided.
 
-## What do you need to run this bot?
+## What is needed to deploy a button?
 
 * a green button that can trigger a web link, like one of [the smart products from bt.tn](https://bt.tn/shop/) for example
 * a server to run the bot, for example a small Cloud Server at the [Managed Cloud Platform](http://www.dimensiondata.com/Global/Solutions/Cloud/) from Dimension Data
@@ -28,6 +28,8 @@ This project has been named 'The Green Button' by reference to the corporate col
 * some instructions and goodwill :-)
 
 Check [detailed instructions](docs/setup.md) for step-by-step deployment of a running installation. Then edit [configuration files](docs/configuration.md) that control the behaviour of each button connected to the system.
+
+If you are a Dimension Data employee, then you can benefit from the back-end that has been put in place for the project. Acquire a connected button and contact the Green Force group in Yammer.
 
 ## Is it easy to configure a button?
 
