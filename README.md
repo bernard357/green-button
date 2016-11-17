@@ -22,22 +22,30 @@ This project has been named 'The Green Button' by reference to the corporate col
 ## What do you need to run this bot?
 
 * a green button that can trigger a web link, like one of [the smart products from bt.tn](https://bt.tn/shop/) for example
-* a server to run the bot, for example a small Cloud Server at the Managed Cloud Platform from Dimension Data
+* a server to run the bot, for example a small Cloud Server at the [Managed Cloud Platform](http://www.dimensiondata.com/Global/Solutions/Cloud/) from Dimension Data
 * a token for your bot, provided by [Cisco Spark for Developers](https://developer.ciscospark.com/index.html)
 * credentials at [Twilio](https://www.twilio.com) to use their communication services (SMS and voice)
 * some instructions and goodwill :-)
 
 Check [detailed instructions](docs/setup.md) for step-by-step deployment of a running installation. Then edit [configuration files](docs/configuration.md) that control the behaviour of each button connected to the system.
 
-## What can this bot really do?
+## Is it easy to configure a button?
 
-The bot can:
+Yes, since the behaviour of each button is described in a separate configuration file.
+Some [examples](buttons) are provided so that you have something to start with.
+
+Configuration files are plain text files, where you describe in sequence what to do
+on first push of the button, on second push, etc.
+
+The Green Button can handle following actions:
 * create Cisco Spark rooms
 * add moderators and participants
 * upload binary files
 * post messages formatted in Markdown
 * send SMS over Twilio
 * call phone numbers over Twilio and say something
+
+Ready to go? Check [the configuration page](docs.configuration.md) for more details
 
 ## Where to find additional assistance?
 

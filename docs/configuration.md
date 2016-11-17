@@ -1,6 +1,14 @@
 # How to configure a button?
 
-You do not need to be a software developer to use this bot. There is one general configuration file for the server itself, and then one configuration file per button.
+If you know how to modify a text file, then you can build the button that is perfectly adpated to your specific needs. There is one general configuration file for the server itself, and then one configuration file per button.
+
+The Green Button project is provided with sample configuration files for two buttons: `incident` and `request`. These are described below for reference. You are encouraged to duplicate on of these files in the directory `buttons` and to edit it.
+
+For example, if you want to create a button named `urgent_123` that is derived from `incident`:
+* go to the `buttons` directory
+* copy `incident.yaml` to `urgent_123.yaml`
+* edit `urgent_123.yaml` and adapt messages, files, people and phone number
+* save changes and use the button: `http://<server_url>/urgent_123`
 
 ## Sample configuration file for the button `incident`
 
@@ -13,6 +21,8 @@ Alice says to Bob: you already know managed services from Dimension Data. Here i
 2- If people in the team of Alice are too busy they may not pop up immediately. In that case, Bob presses the button a second time. This sends SMS to Alice, and that action is recorded in the room.
 
 3- A third press on the button  triggers a phone call to Alice, so that she is invited to join the room immediately.
+
+The configuration file for the button `incident` is `buttons/incident.yaml`
 
 ```yaml
 bt.tn:
@@ -112,6 +122,8 @@ When Bob pushes the button a notification is sent to the room, and a SMS to Alic
 When Bob pushes the button a second time within some minutes, then a voice call is made to Alice. Then Alice knows that there is an urgent case# to handle. She can either move to the room, send a SMS, or find other ways to satisfy Bob.
 
 After some minutes the system is reset, ready for next transaction. The room preserves context information over time.
+
+The configuration file for the button `request` is `buttons/request.yaml`
 
 ```yaml
 bt.tn:
