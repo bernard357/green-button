@@ -65,7 +65,6 @@ spark:
     #
     moderators:
       - bernard.paques@dimensiondata.com
-      - foo.bar@acme.com
 
     # pre-defined participants
     #
