@@ -9,6 +9,7 @@ import time
 import mock
 from requests import ConnectionError
 import base64
+import yaml
 
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -42,6 +43,7 @@ class HookTests(unittest.TestCase):
         settings = configure('settings.yaml')
 
         context = load_button(settings)
+        context['count'] = 0
         self.assertTrue(isinstance(context, dict))
 
         self.assertEqual(context['count'], 0)
@@ -90,6 +92,20 @@ class HookTests(unittest.TestCase):
         self.assertTrue(len(context['twilio']['TWILIO_AUTH_TOKEN']) > 5)
 
         self.assertTrue(context['server']['default'] == 'incident')
+
+    def test_load_buttons(self):
+
+        print('***** Test load buttons ***')
+
+        from hook import configure, load_buttons
+
+        settings = configure('settings.yaml')
+        buttons = load_buttons(settings)
+
+        keys = buttons.keys()
+        self.assertTrue('incident' in keys)
+        self.assertTrue('request' in keys)
+
 
     def test_get_room(self):
 
@@ -180,16 +196,16 @@ class HookTests(unittest.TestCase):
         self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT'), 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT')
 
         settings = {'name': 'button_123', 'server': {'key': 'a_secret'}}
-        self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT')
-        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT'), 'button_123')
+        self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzpPZEFRbkNMSlVXd1lqSTFWTmVoSkV3PT0=')
+        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzpPZEFRbkNMSlVXd1lqSTFWTmVoSkV3PT0='), 'button_123')
 
         settings = {'name': 'button_456', 'server': {'key': 'a_secret'}}
-        self.assertEqual(encode(settings), 'YnV0dG9uXzQ1NjrE8Sx5Yw1sI8XmHuBjHIIr')
-        self.assertEqual(decode(settings, 'YnV0dG9uXzQ1NjrE8Sx5Yw1sI8XmHuBjHIIr'), 'button_456')
+        self.assertEqual(encode(settings), 'YnV0dG9uXzQ1Njp4UEVzZVdNTmJDUEY1aDdnWXh5Q0t3PT0=')
+        self.assertEqual(decode(settings, 'YnV0dG9uXzQ1Njp4UEVzZVdNTmJDUEY1aDdnWXh5Q0t3PT0='), 'button_456')
 
         settings = {'name': 'button_123', 'server': {'key': 'another_secret'}}
-        self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzr2xacqEE3hID3LJT9DWXkB')
-        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzr2xacqEE3hID3LJT9DWXkB'), 'button_123')
+        self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzo5c1duS2hCTjRTQTl5eVUvUTFsNUFRPT0=')
+        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo5c1duS2hCTjRTQTl5eVUvUTFsNUFRPT0='), 'button_123')
 
         with self.assertRaises(Exception):
             decode(settings, '')
@@ -204,6 +220,28 @@ class HookTests(unittest.TestCase):
             hash = 'forged_hash'
             decode(settings, base64.b64encode(settings['name']+':'+hash))
 
+    def test_generate_tokens(self):
+
+        print('***** Test generate tokens ***')
+
+        from hook import generate_tokens, decode
+
+        settings = {'server': {}}
+        tokens = generate_tokens(settings, ('incident', 'request'))
+        self.assertEqual(tokens, {})
+
+        settings = {'server': {'key': 'a_secret'}}
+        tokens = generate_tokens(settings, ('incident', 'request'))
+        self.assertEqual(tokens.keys(), ['incident', 'request'])
+        self.assertEqual(tokens['incident'], 'aW5jaWRlbnQ6WHFUWXBoc0tvV2toMkdTM1dQTHpIZz09')
+        self.assertEqual(decode(settings, tokens['incident']), 'incident')
+        self.assertEqual(tokens['request'], 'cmVxdWVzdDpGT2krUDJpM0lJY0hEbFYxZ2R6UGZ3PT0=')
+        self.assertEqual(decode(settings, tokens['request']), 'request')
+
+        with open(os.path.abspath(os.path.dirname(__file__))+'/../.tokens', 'r') as handle:
+            tokens2 = yaml.load(handle)
+
+        self.assertEqual(tokens, tokens2)
 
 
 if __name__ == '__main__':

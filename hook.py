@@ -540,7 +540,22 @@ def web_inbound_call(button=None):
 buttons = {}
 
 def load_buttons(settings):
-    pass
+
+    global buttons
+    buttons = {}
+
+    for there, unused, files in os.walk(os.path.abspath(os.path.dirname(__file__))+'/buttons'):
+        logging.debug("Walking %s", there)
+
+        for file in files:
+            logging.debug("Found file %s", file)
+            button, extension = file.split('.', 1)
+            if extension == 'yaml':
+                buttons[ button ] = load_button(settings, button)
+
+    generate_tokens(settings, buttons.keys())
+
+    return buttons
 
 def load_button(settings, name='incident'):
     """
@@ -565,6 +580,7 @@ def load_button(settings, name='incident'):
 
     # memoization
     #
+    global buttons
     if name in buttons:
         return buttons[ name ]
 
@@ -622,7 +638,7 @@ def load_button(settings, name='incident'):
 
     # save button state
     #
-    buttons[ name ] = context
+    buttons[ context['name'] ] = context
     return context
 
 #
@@ -726,7 +742,7 @@ def encode(settings):
     if 'key' not in settings['server']:
         return settings['name']
 
-    hash = hmac.new(settings['server']['key'], settings['name']).digest()
+    hash = base64.b64encode(hmac.new(settings['server']['key'], settings['name']).digest())
 
     return base64.b64encode(settings['name']+':'+hash)
 
@@ -739,7 +755,7 @@ def decode(settings, token):
         return token
 
     try:
-        name, hash = base64.b64decode(token).split(':',1)
+        name, hash = base64.b64decode(token).split(':', 1)
     except TypeError as feedback:
         logging.error('ERROR: incorrect encoding of the security token')
         raise Exception('Invalid security token')
@@ -747,13 +763,29 @@ def decode(settings, token):
         logging.error('ERROR: no hash in security token')
         raise Exception('Invalid security token')
 
-    expected = hmac.new(settings['server']['key'], name).digest()
+    expected = base64.b64encode(hmac.new(settings['server']['key'], name).digest())
 
     if hash != expected:
         logging.error('ERROR: incorrect hash in security token')
         raise Exception('Invalid security token')
 
     return name
+
+def generate_tokens(settings, buttons):
+
+    if 'key' not in settings['server']:
+        return {}
+
+    tokens = {}
+    for button in buttons:
+        context = { 'server': {'key': settings['server']['key']},
+                    'name': button }
+        tokens[button] = encode(context)
+
+    with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
+        yaml.dump(tokens, handle, default_flow_style=False)
+
+    return tokens
 
 #
 # launched from the command line
