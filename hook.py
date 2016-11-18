@@ -11,6 +11,8 @@ from twilio.rest import TwilioRestClient
 import twilio.twiml
 import yaml
 import copy
+import base64
+import hmac
 
 #
 # web services
@@ -35,7 +37,7 @@ def web_press(button=None):
     if button is None:
         button = settings['server']['default']
 
-    logging.info("Button {} has been pressed".format(button))
+    button = decode(settings, button)
 
     context = load_button(settings, button)
 
@@ -49,6 +51,9 @@ def handle_button(context):
     :type context: ``dict``
 
     """
+
+    logging.info("Handling button {}".format(context['name']))
+
     try:
 
         context['spark']['id'] = get_room(context)
@@ -194,7 +199,7 @@ def create_room(context):
     This function also adds appropriate audience to the room
     """
 
-    logging.info("Creating Cisco Spark room")
+    logging.info("Creating Cisco Spark room {}".format(context['spark']['room']))
 
     url = 'https://api.ciscospark.com/v1/rooms'
     headers = {'Authorization': 'Bearer '+context['spark']['CISCO_SPARK_BTTN_BOT']}
@@ -225,7 +230,7 @@ def web_delete(button=None):
     if button is None:
         button = settings['server']['default']
 
-    logging.info("Button {} has been pressed".format(button))
+    button = decode(settings, button)
 
     context = load_button(settings, button)
 
@@ -475,7 +480,7 @@ def phone_call(context, details):
             update = { 'markdown': 'No URL for the call - check configuration'}
             post_update(context, update)
             return
-        url = context['server']['url'].rstrip('/')+'/call/'.context['name']
+        url = context['server']['url'].rstrip('/')+'/call/'.encode(context)
 
     logging.info("- using '{}'".format(url))
 
@@ -515,6 +520,8 @@ def web_inbound_call(button=None):
     if button is None:
         button = settings['server']['default']
 
+    button = decode(settings, button)
+
     logging.info("Receiving inbound call for button {}".format(button))
 
     context = load_button(settings, button)
@@ -532,6 +539,34 @@ def web_inbound_call(button=None):
 
 buttons = {}
 
+def encode(context):
+    """
+    Provides a security token for a button
+    """
+
+    if 'key' not in context['server']:
+        return context['name']
+
+    hash = hmac.new(context['server']['key'], context['name']).digest()
+
+    return base64.b64encode(context['name']+':'+hash)
+
+def decode(settings, token):
+    """
+    Decodes button name from a security token
+    """
+
+    if 'key' not in settings['server']:
+        return token
+
+    name, hash = base64.b64decode(token).split(':',1)
+
+    expected = hmac.new(settings['server']['key'], name).digest()
+
+    if hash != expected:
+        raise Exception('Invalid security token')
+
+    return name
 
 def load_button(settings, name='incident'):
     """
@@ -573,7 +608,7 @@ def load_button(settings, name='incident'):
             additions = yaml.load(stream)
     except Exception as feedback:
         logging.error(str(feedback))
-        return context
+        raise
 
     if not isinstance(additions, dict):
         logging.error('No configuration information in {}'.format(name))

@@ -41,5 +41,9 @@ server:
     #
     default: incident
 
+    # if you set a secret, use security tokens instead of button names in URL
+    #
+    #secret: "a long and difficult pass phrase"
+
 
 
