@@ -8,6 +8,7 @@ import sys
 import time
 import mock
 from requests import ConnectionError
+import base64
 
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -175,6 +176,9 @@ class HookTests(unittest.TestCase):
         self.assertEqual(encode(settings), 'button_123')
         self.assertEqual(decode(settings, 'button_123'), 'button_123')
 
+        self.assertEqual(decode(settings, ''), '')
+        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT'), 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT')
+
         settings = {'name': 'button_123', 'server': {'key': 'a_secret'}}
         self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT')
         self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT'), 'button_123')
@@ -182,6 +186,20 @@ class HookTests(unittest.TestCase):
         settings = {'name': 'button_123', 'server': {'key': 'another_secret'}}
         self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzr2xacqEE3hID3LJT9DWXkB')
         self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzr2xacqEE3hID3LJT9DWXkB'), 'button_123')
+
+        with self.assertRaises(Exception):
+            decode(settings, '')
+
+        with self.assertRaises(Exception):
+            decode(settings, settings['name'])
+
+        with self.assertRaises(Exception):
+            decode(settings, base64.b64encode(settings['name']))
+
+        with self.assertRaises(Exception):
+            hash = 'forged_hash'
+            decode(settings, base64.b64encode(settings['name']+':'+hash))
+
 
 
 if __name__ == '__main__':

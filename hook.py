@@ -539,34 +539,8 @@ def web_inbound_call(button=None):
 
 buttons = {}
 
-def encode(context):
-    """
-    Provides a security token for a button
-    """
-
-    if 'key' not in context['server']:
-        return context['name']
-
-    hash = hmac.new(context['server']['key'], context['name']).digest()
-
-    return base64.b64encode(context['name']+':'+hash)
-
-def decode(settings, token):
-    """
-    Decodes button name from a security token
-    """
-
-    if 'key' not in settings['server']:
-        return token
-
-    name, hash = base64.b64decode(token).split(':',1)
-
-    expected = hmac.new(settings['server']['key'], name).digest()
-
-    if hash != expected:
-        raise Exception('Invalid security token')
-
-    return name
+def load_buttons(settings):
+    pass
 
 def load_button(settings, name='incident'):
     """
@@ -744,6 +718,43 @@ def configure(name="settings.yaml"):
 
     return settings
 
+def encode(settings):
+    """
+    Provides a security token for a button
+    """
+
+    if 'key' not in settings['server']:
+        return settings['name']
+
+    hash = hmac.new(settings['server']['key'], settings['name']).digest()
+
+    return base64.b64encode(settings['name']+':'+hash)
+
+def decode(settings, token):
+    """
+    Decodes button name from a security token
+    """
+
+    if 'key' not in settings['server']:
+        return token
+
+    try:
+        name, hash = base64.b64decode(token).split(':',1)
+    except TypeError as feedback:
+        logging.error('ERROR: incorrect encoding of the security token')
+        raise Exception('Invalid security token')
+    except ValueError as feedback:
+        logging.error('ERROR: no hash in security token')
+        raise Exception('Invalid security token')
+
+    expected = hmac.new(settings['server']['key'], name).digest()
+
+    if hash != expected:
+        logging.error('ERROR: incorrect hash in security token')
+        raise Exception('Invalid security token')
+
+    return name
+
 #
 # launched from the command line
 #
@@ -753,6 +764,10 @@ if __name__ == "__main__":
     # read configuration file, look at the environment
     #
     settings = configure()
+
+    # pre-load all available buttons
+    #
+    load_buttons(settings)
 
     # wait for button pushes and other web requests
     #
