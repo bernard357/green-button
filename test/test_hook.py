@@ -183,6 +183,10 @@ class HookTests(unittest.TestCase):
         self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT')
         self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT'), 'button_123')
 
+        settings = {'name': 'button_456', 'server': {'key': 'a_secret'}}
+        self.assertEqual(encode(settings), 'YnV0dG9uXzQ1NjrE8Sx5Yw1sI8XmHuBjHIIr')
+        self.assertEqual(decode(settings, 'YnV0dG9uXzQ1NjrE8Sx5Yw1sI8XmHuBjHIIr'), 'button_456')
+
         settings = {'name': 'button_123', 'server': {'key': 'another_secret'}}
         self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzr2xacqEE3hID3LJT9DWXkB')
         self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzr2xacqEE3hID3LJT9DWXkB'), 'button_123')
