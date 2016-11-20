@@ -23,12 +23,14 @@ blueprints:
         - bttn-01:
 
             information:
-              - "Ask bt.tn to perform a web request here:"
-              - "http://{{ node.public }}:8080"
               - "Add a button with new settings file:"
               - "ssh ubuntu@{{ node.public }}"
               - "cd bt.tn-spark/buttons"
               - "sudo restart bttn_spark"
+              - "List tokens:"
+              - "cat .tokens"
+              - "Ask bt.tn to perform a web request here:"
+              - "http://{{ node.public }}:8080"
 
             appliance: 'Ubuntu 14'
 
@@ -113,6 +115,7 @@ blueprints:
                 - git clone https://github.com/bernard357/bt.tn-spark.git
                 - cd bt.tn-spark/
                 - pip install -r requirements.txt
+                - sed -i "/#key:/s/^.*$/    #key: {{ secret.key }} /" settings.yaml
 
                 - echo "===== Starting bt.tn-spark as a daemon service"
                 - chown ubuntu:ubuntu -R /home/ubuntu

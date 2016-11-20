@@ -43,7 +43,7 @@ server:
 
     # if you set a secret, use security tokens instead of button names in URL
     #
-    #secret: "a long and difficult pass phrase"
+    #key: "a long and difficult pass phrase"
 
 
 

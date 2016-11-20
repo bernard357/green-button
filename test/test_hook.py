@@ -153,8 +153,11 @@ class HookTests(unittest.TestCase):
             self.assertEqual(context['count'], 4)
 
             delete_room(context)
+
         except ConnectionError:
             pass
+
+        context['count'] = 0
 
     @mock.patch('hook.send_sms', return_value='pumpkins')
     @mock.patch('hook.phone_call', return_value='pumpkins')
@@ -179,8 +182,53 @@ class HookTests(unittest.TestCase):
             self.assertEqual(context['count'], 2)
 
             delete_room(context)
+
         except ConnectionError:
             pass
+
+        context['count'] = 0
+
+    @mock.patch('hook.send_sms', return_value='pumpkins')
+    @mock.patch('hook.phone_call', return_value='pumpkins')
+    def test_process_push(self, send_sms_patch, phone_call_patch):
+
+        print('***** Test process push ***')
+
+        from hook import configure, load_button, process_push, get_room, delete_room
+        settings = configure('settings.yaml')
+
+        context = load_button(settings, name='incident')
+        self.assertTrue(isinstance(context, dict))
+
+        self.assertEqual(context['count'], 0)
+
+        try:
+            context['spark']['id'] = get_room(context)
+
+            process_push(context)
+
+            self.assertEqual(context['count'], 1)
+
+            process_push(context)
+
+            self.assertEqual(context['count'], 2)
+
+            context['time'] = 0
+
+            process_push(context)
+
+            self.assertEqual(context['count'], 1)
+
+            process_push(context)
+
+            self.assertEqual(context['count'], 2)
+
+            delete_room(context)
+
+        except ConnectionError:
+            pass
+
+        context['count'] = 0
 
     def test_push_details(self):
 
@@ -191,8 +239,6 @@ class HookTests(unittest.TestCase):
 
         context = load_button(settings, name='incident')
         self.assertTrue(isinstance(context, dict))
-
-        self.assertEqual(context['count'], 0)
 
         context['count'] = 1
         update, phone = get_push_details(context)

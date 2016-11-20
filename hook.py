@@ -43,12 +43,12 @@ def web_press(button=None):
 
         context = load_button(settings, button)
 
-        handle_button(context)
-
-        return 'OK'
+        return handle_button(context)
 
     except Exception as feedback:
         response.status = 400
+        raise
+
         return 'Invalid request'
 
 def handle_button(context):
@@ -99,6 +99,16 @@ def process_push(context):
 
     context['count'] += 1
 
+    if 'time' in context:
+        elapsed = time.time() - context['time']
+    else:
+        elapsed = 0
+
+    if 'reset' in context['spark']:
+        reset = int(context['spark']['reset']) * 60
+        if elapsed > reset:
+            context['count'] = 1
+
     update, phone = get_push_details(context)
 
     if 'sms' in phone:
@@ -108,6 +118,8 @@ def process_push(context):
         phone_call(context, phone['call'])
 
     post_update(context, update)
+
+    context['time'] = time.time()
 
 def get_push_details(context):
     """
@@ -837,6 +849,8 @@ def generate_tokens(settings, buttons):
 
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)
+
+    logging.info(tokens)
 
     return tokens
 
