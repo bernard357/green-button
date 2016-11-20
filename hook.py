@@ -37,9 +37,16 @@ def web_press(button=None):
     if button is None:
         button = settings['server']['default']
 
-    button = decode(settings, button)
+    try:
+        button = decode(settings, button)
 
-    context = load_button(settings, button)
+        context = load_button(settings, button)
+
+        return 'OK'
+
+    except:
+        response.status = 400
+        return 'Invalid request'
 
     handle_button(context)
 
@@ -230,11 +237,17 @@ def web_delete(button=None):
     if button is None:
         button = settings['server']['default']
 
-    button = decode(settings, button)
+    try:
+        button = decode(settings, button)
 
-    context = load_button(settings, button)
+        context = load_button(settings, button)
 
-    delete_room(context)
+        delete_room(context)
+
+        return 'OK'
+    except:
+        response.status = 400
+        return 'Invalid request'
 
 def delete_room(context):
     """
@@ -520,18 +533,23 @@ def web_inbound_call(button=None):
     if button is None:
         button = settings['server']['default']
 
-    button = decode(settings, button)
+    try:
+        button = decode(settings, button)
 
-    logging.info("Receiving inbound call for button {}".format(button))
+        logging.info("Receiving inbound call for button {}".format(button))
 
-    context = load_button(settings, button)
+        context = load_button(settings, button)
 
-    response.content_type = 'text/xml'
+        response.content_type = 'text/xml'
 
-    behaviour = twilio.twiml.Response()
-    say = context['twilio'].get('say', "What's up Doc?")
-    behaviour.say(say)
-    return str(behaviour)
+        behaviour = twilio.twiml.Response()
+        say = context['twilio'].get('say', "What's up Doc?")
+        behaviour.say(say)
+        return str(behaviour)
+
+    except:
+        response.status = 400
+        return 'Invalid request'
 
 #
 # the collection of buttons that we manage
