@@ -182,49 +182,110 @@ class HookTests(unittest.TestCase):
         except ConnectionError:
             pass
 
+    def test_push_details(self):
+
+        print('***** Test push details ***')
+
+        from hook import configure, load_button, get_push_details
+        settings = configure('settings.yaml')
+
+        context = load_button(settings, name='incident')
+        self.assertTrue(isinstance(context, dict))
+
+        self.assertEqual(context['count'], 0)
+
+        context['count'] = 1
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['files', 'text', 'markdown'])
+        self.assertEqual(phone.keys(), [])
+
+        context['count'] = 2
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['files', 'text', 'markdown'])
+        self.assertEqual(phone.keys(), ['sms'])
+
+        context['count'] = 3
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['text', 'markdown'])
+        self.assertEqual(phone.keys(), ['call'])
+
+        context['count'] = 4
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['files', 'text'])
+        self.assertEqual(phone.keys(), [])
+
+        context['count'] = 5
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['files', 'text'])
+        self.assertEqual(phone.keys(), [])
+
+        context['count'] = 6
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['text'])
+        self.assertEqual(phone.keys(), [])
+
+        context['count'] = 0
+
+        context = load_button(settings, name='request')
+        self.assertTrue(isinstance(context, dict))
+
+        self.assertEqual(context['count'], 0)
+
+        context['count'] = 1
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['files', 'text', 'markdown'])
+        self.assertEqual(phone.keys(), ['sms'])
+
+        context['count'] = 2
+        update, phone = get_push_details(context)
+        self.assertEqual(update.keys(), ['text', 'markdown'])
+        self.assertEqual(phone.keys(), ['call'])
+
+        context['count'] = 0
+
     def test_token(self):
 
         print('***** Test security token ***')
 
-        from hook import encode, decode
+        from hook import encode_token, decode_token
 
         settings = {'name': 'button_123', 'server': {}}
-        self.assertEqual(encode(settings), 'button_123')
-        self.assertEqual(decode(settings, 'button_123'), 'button_123')
+        self.assertEqual(encode_token(settings), 'button_123')
+        self.assertEqual(decode_token(settings, 'button_123'), 'button_123')
 
-        self.assertEqual(decode(settings, ''), '')
-        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT'), 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT')
+        self.assertEqual(decode_token(settings, ''), '')
+        self.assertEqual(decode_token(settings, 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT'), 'YnV0dG9uXzEyMzo50BCcIslRbBiMjVU16EkT')
 
         settings = {'name': 'button_123', 'server': {'key': 'a_secret'}}
-        self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzpPZEFRbkNMSlVXd1lqSTFWTmVoSkV3PT0=')
-        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzpPZEFRbkNMSlVXd1lqSTFWTmVoSkV3PT0='), 'button_123')
+        self.assertEqual(encode_token(settings), 'YnV0dG9uXzEyMzpPZEFRbkNMSlVXd1lqSTFWTmVoSkV3PT0=')
+        self.assertEqual(decode_token(settings, 'YnV0dG9uXzEyMzpPZEFRbkNMSlVXd1lqSTFWTmVoSkV3PT0='), 'button_123')
 
         settings = {'name': 'button_456', 'server': {'key': 'a_secret'}}
-        self.assertEqual(encode(settings), 'YnV0dG9uXzQ1Njp4UEVzZVdNTmJDUEY1aDdnWXh5Q0t3PT0=')
-        self.assertEqual(decode(settings, 'YnV0dG9uXzQ1Njp4UEVzZVdNTmJDUEY1aDdnWXh5Q0t3PT0='), 'button_456')
+        self.assertEqual(encode_token(settings), 'YnV0dG9uXzQ1Njp4UEVzZVdNTmJDUEY1aDdnWXh5Q0t3PT0=')
+        self.assertEqual(decode_token(settings, 'YnV0dG9uXzQ1Njp4UEVzZVdNTmJDUEY1aDdnWXh5Q0t3PT0='), 'button_456')
 
         settings = {'name': 'button_123', 'server': {'key': 'another_secret'}}
-        self.assertEqual(encode(settings), 'YnV0dG9uXzEyMzo5c1duS2hCTjRTQTl5eVUvUTFsNUFRPT0=')
-        self.assertEqual(decode(settings, 'YnV0dG9uXzEyMzo5c1duS2hCTjRTQTl5eVUvUTFsNUFRPT0='), 'button_123')
+        self.assertEqual(encode_token(settings), 'YnV0dG9uXzEyMzo5c1duS2hCTjRTQTl5eVUvUTFsNUFRPT0=')
+        self.assertEqual(decode_token(settings, 'YnV0dG9uXzEyMzo5c1duS2hCTjRTQTl5eVUvUTFsNUFRPT0='), 'button_123')
 
         with self.assertRaises(Exception):
-            decode(settings, '')
+            decode_token(settings, '')
 
         with self.assertRaises(Exception):
-            decode(settings, settings['name'])
+            decode_token(settings, settings['name'])
 
         with self.assertRaises(Exception):
-            decode(settings, base64.b64encode(settings['name']))
+            decode_token(settings, base64.b64encode(settings['name']))
 
         with self.assertRaises(Exception):
             hash = 'forged_hash'
-            decode(settings, base64.b64encode(settings['name']+':'+hash))
+            decode_token(settings, base64.b64encode(settings['name']+':'+hash))
 
     def test_generate_tokens(self):
 
         print('***** Test generate tokens ***')
 
-        from hook import generate_tokens, decode
+        from hook import generate_tokens, decode_token
 
         settings = {'server': {}}
         tokens = generate_tokens(settings, ('incident', 'request'))
@@ -234,9 +295,9 @@ class HookTests(unittest.TestCase):
         tokens = generate_tokens(settings, ('incident', 'request'))
         self.assertEqual(tokens.keys(), ['incident', 'request'])
         self.assertEqual(tokens['incident'], 'aW5jaWRlbnQ6WHFUWXBoc0tvV2toMkdTM1dQTHpIZz09')
-        self.assertEqual(decode(settings, tokens['incident']), 'incident')
+        self.assertEqual(decode_token(settings, tokens['incident']), 'incident')
         self.assertEqual(tokens['request'], 'cmVxdWVzdDpGT2krUDJpM0lJY0hEbFYxZ2R6UGZ3PT0=')
-        self.assertEqual(decode(settings, tokens['request']), 'request')
+        self.assertEqual(decode_token(settings, tokens['request']), 'request')
 
         with open(os.path.abspath(os.path.dirname(__file__))+'/../.tokens', 'r') as handle:
             tokens2 = yaml.load(handle)

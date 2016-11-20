@@ -38,17 +38,18 @@ def web_press(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode(settings, button)
+
+        button = decode_token(settings, button)
 
         context = load_button(settings, button)
 
+        handle_button(context)
+
         return 'OK'
 
-    except:
+    except Exception as feedback:
         response.status = 400
         return 'Invalid request'
-
-    handle_button(context)
 
 def handle_button(context):
     """
@@ -94,25 +95,53 @@ def process_push(context):
 
     """
 
-    logging.info("Building update")
+    logging.info("Processing push")
+
+    context['count'] += 1
+
+    update, phone = get_push_details(context)
+
+    if 'sms' in phone:
+        send_sms(context, phone['sms'])
+
+    if 'call' in phone:
+        phone_call(context, phone['call'])
+
+    post_update(context, update)
+
+def get_push_details(context):
+    """
+    Provides actions for current push
+
+    :param context: button state and configuration
+    :type context: ``dict``
+
+    The action can be either:
+
+    * send a text message to the room with `text:` statement
+    * send a Markdown message to the room with `markdown:` statement
+    * upload a file with `file:`, `label:` and `type:`
+    * arrange a conference with numbers under the 'conference:' statement
+    * a combination of any previous
+
+    """
+
+    logging.info("Getting push details")
+
+    update = {'text': ''}
+    phone = {}
 
     items = context['bt.tn']
-    if context['count'] < len(items):
-        logging.info("- using item {}".format(context['count']+1))
-        item = items[ context['count'] ]
-
-        update = {'text': ''}
+    if context['count'] < len(items)+1:
+        logging.info("- using item {}".format(context['count']))
+        item = items[ context['count']-1 ]
 
         # textual message
         #
         if 'markdown' in item:
-
-            text = 'using markdown content'
             update['markdown'] = item['markdown']
 
         elif 'message' in item:
-
-            text = "'{}".format(item['message'])
             update['text'] += item['message']+'\n'
 
         # file upload
@@ -138,23 +167,19 @@ def process_push(context):
         # send a SMS
         #
         if 'sms' in item:
-            send_sms(context, item['sms'])
+            phone = { 'sms': item['sms'] }
 
         # phone call
         #
         if 'call' in item:
-            phone_call(context, item['call'])
+            phone = { 'call': item['call'] }
 
     # ping message
     #
     else:
-        text = 'ping {}'.format(context['count'])
-        update = text
+        update['text'] = 'push {}'.format(context['count'])
 
-    context['count'] += 1
-
-    logging.info("- {}".format(text))
-    post_update(context, update)
+    return update, phone
 
 #
 # Handle Cisco Spark API
@@ -238,13 +263,14 @@ def web_delete(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode(settings, button)
+        button = decode_token(settings, button)
 
         context = load_button(settings, button)
 
         delete_room(context)
 
         return 'OK'
+
     except:
         response.status = 400
         return 'Invalid request'
@@ -479,7 +505,7 @@ def phone_call(context, details):
             url = line['url']
 
         if line.keys()[0] == 'say':
-            settings['twilio']['say'] = line['say']
+            context['twilio']['say'] = line['say']
 
         if line.keys()[0] == 'from':
             from_number = line['from']
@@ -493,7 +519,7 @@ def phone_call(context, details):
             update = { 'markdown': 'No URL for the call - check configuration'}
             post_update(context, update)
             return
-        url = context['server']['url'].rstrip('/')+'/call/'.encode(context)
+        url = context['server']['url'].rstrip('/')+'/call/'+encode_token(context)
 
     logging.info("- using '{}'".format(url))
 
@@ -534,21 +560,33 @@ def web_inbound_call(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode(settings, button)
+        button = decode_token(settings, button)
 
         logging.info("Receiving inbound call for button {}".format(button))
 
         context = load_button(settings, button)
+        update, twilio_action = get_push_details(context)
 
         response.content_type = 'text/xml'
-
         behaviour = twilio.twiml.Response()
-        say = context['twilio'].get('say', "What's up Doc?")
+
+        say = None
+        if 'call' in twilio_action:
+            for line in twilio_action['call']:
+                if line.keys()[0] == 'say':
+                    say = line['say']
+                    break
+
+        if say is None:
+            say = "What's up Doc?"
+
         behaviour.say(say)
         return str(behaviour)
 
     except:
         response.status = 400
+        raise
+
         return 'Invalid request'
 
 #
@@ -654,9 +692,6 @@ def load_button(settings, name='incident'):
     #
     context['count'] = 0
 
-    # save button state
-    #
-    buttons[ context['name'] ] = context
     return context
 
 #
@@ -752,7 +787,7 @@ def configure(name="settings.yaml"):
 
     return settings
 
-def encode(settings):
+def encode_token(settings):
     """
     Provides a security token for a button
     """
@@ -764,7 +799,7 @@ def encode(settings):
 
     return base64.b64encode(settings['name']+':'+hash)
 
-def decode(settings, token):
+def decode_token(settings, token):
     """
     Decodes button name from a security token
     """
@@ -798,7 +833,7 @@ def generate_tokens(settings, buttons):
     for button in buttons:
         context = { 'server': {'key': settings['server']['key']},
                     'name': button }
-        tokens[button] = encode(context)
+        tokens[button] = encode_token(context)
 
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)
