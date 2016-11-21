@@ -25,12 +25,16 @@ blueprints:
             information:
               - "Add a button with new settings file:"
               - "ssh ubuntu@{{ node.public }}"
-              - "cd bt.tn-spark/buttons"
-              - "sudo restart bttn_spark"
-              - "List tokens:"
-              - "cat .tokens"
-              - "Ask bt.tn to perform a web request here:"
-              - "http://{{ node.public }}:8080"
+              - "pushd bt.tn-spark/buttons"
+              - "cp incident.yaml a_new_button.yaml"
+              - "nano a_new_button.yaml"
+              - "popd"
+              - "List security tokens:"
+              - "python tokens.py"
+              - "Ask bt.tn to perform web requests here:"
+              - "http://{{ node.public }}:8080/<button_token>"
+              - "To reset a room go to this web link:"
+              - "http://{{ node.public }}:8080/delete/<button_token>"
 
             appliance: 'Ubuntu 14'
 
