@@ -46,9 +46,8 @@ def web_press(button=None):
         return handle_button(context)
 
     except Exception as feedback:
+        logging.error(str(feedback))
         response.status = 400
-        raise
-
         return 'Invalid request'
 
 def handle_button(context):
@@ -62,18 +61,11 @@ def handle_button(context):
 
     logging.info("Handling button {}".format(context['name']))
 
-    try:
+    context['spark']['id'] = get_room(context)
 
-        context['spark']['id'] = get_room(context)
+    process_push(context)
 
-        process_push(context)
-
-        return "OK {}\n".format(context['count'])
-
-    except Exception as feedback:
-        logging.info("ABORTED: fatal error has been encountered")
-        logging.info(str(feedback))
-        raise
+    return "OK {}\n".format(context['count'])
 
 def process_push(context):
     """
@@ -283,7 +275,8 @@ def web_delete(button=None):
 
         return 'OK'
 
-    except:
+    except Exception as feedback:
+        logging.error(str(feedback))
         response.status = 400
         return 'Invalid request'
 
@@ -595,11 +588,11 @@ def web_inbound_call(button=None):
         behaviour.say(say)
         return str(behaviour)
 
-    except:
+    except Exception as feedback:
+        logging.error(str(feedback))
         response.status = 400
-        raise
-
         return 'Invalid request'
+
 
 #
 # the collection of buttons that we manage
