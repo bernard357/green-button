@@ -621,8 +621,6 @@ def load_buttons(settings):
             if extension == 'yaml':
                 buttons[ button ] = load_button(settings, button)
 
-    generate_tokens(settings, buttons.keys())
-
     return buttons
 
 def load_button(settings, name='incident'):
@@ -703,6 +701,11 @@ def load_button(settings, name='incident'):
     # first push of this button
     #
     context['count'] = 0
+
+    # save button state and security token
+    #
+    buttons[ context['name'] ] = context
+    generate_tokens(settings, buttons.keys())
 
     return context
 

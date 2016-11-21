@@ -14,6 +14,22 @@ import yaml
 
 sys.path.insert(0, os.path.abspath('..'))
 
+my_button = """
+bt.tn:
+
+  - text: hello
+
+  - text: world
+
+spark:
+
+    room: "another green button"
+
+    moderators:
+      - bernard.paques@dimensiondata.com
+
+"""
+
 class HookTests(unittest.TestCase):
 
     def test_configure(self):
@@ -106,6 +122,41 @@ class HookTests(unittest.TestCase):
         self.assertTrue('incident' in keys)
         self.assertTrue('request' in keys)
 
+
+    def test_temporary_button(self):
+
+        print('***** Test temporary button ***')
+
+        from hook import configure, load_buttons, load_button, generate_tokens
+
+        settings = configure('settings.yaml')
+        settings['server']['key'] = 'a_secret'
+
+        buttons = load_buttons(settings)
+        keys = buttons.keys()
+        self.assertTrue('incident' in keys)
+        self.assertTrue('request' in keys)
+
+        with open(os.path.abspath(os.path.dirname(__file__))+'/../buttons/temporary.yaml', 'w') as handle:
+            handle.write(my_button)
+
+        context = load_button(settings, 'temporary')
+
+        buttons = load_buttons(settings)
+        keys = buttons.keys()
+        self.assertTrue('incident' in keys)
+        self.assertTrue('request' in keys)
+        self.assertTrue('temporary' in keys)
+
+        with open(os.path.abspath(os.path.dirname(__file__))+'/../.tokens', 'r') as handle:
+            tokens = yaml.load(handle)
+
+        keys = tokens.keys()
+        self.assertTrue('incident' in keys)
+        self.assertTrue('request' in keys)
+        self.assertTrue('temporary' in keys)
+
+        os.remove(os.path.abspath(os.path.dirname(__file__))+'/../buttons/temporary.yaml')
 
     def test_get_room(self):
 
