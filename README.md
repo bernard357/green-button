@@ -52,7 +52,7 @@ Ready to go? Check [the configuration page](docs/configuration.md) for more deta
 ## Where to find additional assistance?
 
 Well, maybe you would like to check [Frequently asked questions](docs/questions.md) and related responses.
-Then you can raise an issue at the GitHub project page.
+Then you can [raise an issue at the GitHub project page](https://github.com/bernard357/bt.tn-spark/issues) and get support from the project team.
 
 Last but not least, if you are a Dimension Data employee, reach out the Green Force group at Yammer and engage with
 other digital practitioners.

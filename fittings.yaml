@@ -25,16 +25,20 @@ blueprints:
             information:
               - "Add a button with new settings file:"
               - "ssh ubuntu@{{ node.public }}"
-              - "pushd bt.tn-spark/buttons"
-              - "cp incident.yaml a_new_button.yaml"
-              - "nano a_new_button.yaml"
-              - "popd"
+              - "cd bt.tn-spark/buttons"
+              - "cp incident.yaml urgent_123.yaml"
+              - "nano urgent_123.yaml"
+              - "cd .."
               - "List security tokens:"
               - "python tokens.py"
               - "Ask bt.tn to perform web requests here:"
               - "http://{{ node.public }}:8080/<button_token>"
               - "To reset a room go to this web link:"
               - "http://{{ node.public }}:8080/delete/<button_token>"
+              - "To review/stop/start the service:"
+              - "sudo status bttn_spark"
+              - "sudo stop bttn_spark"
+              - "sudo start bttn_spark"
 
             appliance: 'Ubuntu 14'
 
@@ -102,6 +106,11 @@ blueprints:
                      print "{{ node.private }}    {{ node.name }}"
                     }
 
+                - path: /root/settings.sed
+                  content: |
+                    #!/usr/bin/sed
+                    /#key:/s/^.*$/    key: {{ secret.key }} /
+
               runcmd:
 
                 - echo "===== Handling ubuntu identity"
@@ -119,7 +128,7 @@ blueprints:
                 - git clone https://github.com/bernard357/bt.tn-spark.git
                 - cd bt.tn-spark/
                 - pip install -r requirements.txt
-                - sed -i "/#key:/s/^.*$/    #key: {{ secret.key }} /" settings.yaml
+                - sed -i -f /root/settings.sed settings.yaml
 
                 - echo "===== Starting bt.tn-spark as a daemon service"
                 - chown ubuntu:ubuntu -R /home/ubuntu
