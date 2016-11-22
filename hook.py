@@ -267,7 +267,7 @@ def web_delete(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode_token(settings, button)
+        button = decode_token(settings, button).split('-')[0]
 
         context = load_button(settings, button)
 
@@ -524,7 +524,7 @@ def phone_call(context, details):
             update = { 'markdown': 'No URL for the call - check configuration'}
             post_update(context, update)
             return
-        url = context['server']['url'].rstrip('/')+'/call/'+encode_token(context)
+        url = context['server']['url'].rstrip('/')+'/call/'+encode_token(context, context['name']+'-call')
 
     logging.info("- using '{}'".format(url))
 
@@ -565,7 +565,7 @@ def web_inbound_call(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode_token(settings, button)
+        button = decode_token(settings, button).split('-')[0]
 
         logging.info("Receiving inbound call for button {}".format(button))
 
@@ -795,17 +795,20 @@ def configure(name="settings.yaml"):
 
     return settings
 
-def encode_token(settings):
+def encode_token(settings, label=None):
     """
     Provides a security token for a button
     """
 
+    if label is None:
+        label = settings['name']
+
     if 'key' not in settings['server']:
-        return settings['name']
+        return label
 
-    hash = base64.b64encode(hmac.new(settings['server']['key'], settings['name']).digest())
+    hash = base64.b64encode(hmac.new(settings['server']['key'], label).digest())
 
-    return base64.b64encode(settings['name']+':'+hash)
+    return base64.b64encode(label+':'+hash)
 
 def decode_token(settings, token):
     """
@@ -816,7 +819,7 @@ def decode_token(settings, token):
         return token
 
     try:
-        name, hash = base64.b64decode(token).split(':', 1)
+        label, hash = base64.b64decode(token).split(':', 1)
     except TypeError as feedback:
         logging.error('ERROR: incorrect encoding of the security token')
         raise Exception('Invalid security token')
@@ -824,13 +827,13 @@ def decode_token(settings, token):
         logging.error('ERROR: no hash in security token')
         raise Exception('Invalid security token')
 
-    expected = base64.b64encode(hmac.new(settings['server']['key'], name).digest())
+    expected = base64.b64encode(hmac.new(settings['server']['key'], label).digest())
 
     if hash != expected:
         logging.error('ERROR: incorrect hash in security token')
         raise Exception('Invalid security token')
 
-    return name
+    return label
 
 def generate_tokens(settings, buttons):
 
@@ -839,9 +842,14 @@ def generate_tokens(settings, buttons):
 
     tokens = {}
     for button in buttons:
-        context = { 'server': {'key': settings['server']['key']},
-                    'name': button }
-        tokens[button] = encode_token(context)
+
+        context = { 'server': {'key': settings['server']['key']}}
+
+        tokens[button] = encode_token(context, button)
+
+        tokens[button+'-call'] = encode_token(context, button+'-call')
+
+        tokens[button+'-delete'] = encode_token(context, button+'-delete')
 
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)

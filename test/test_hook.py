@@ -385,16 +385,24 @@ class HookTests(unittest.TestCase):
         from hook import generate_tokens, decode_token
 
         settings = {'server': {}}
-        tokens = generate_tokens(settings, ('incident', 'request'))
+        tokens = generate_tokens(settings, ['incident', 'request'])
         self.assertEqual(tokens, {})
 
         settings = {'server': {'key': 'a_secret'}}
-        tokens = generate_tokens(settings, ('incident', 'request'))
-        self.assertEqual(tokens.keys(), ['incident', 'request'])
+        tokens = generate_tokens(settings, ['incident', 'request'])
+        self.assertEqual(tokens.keys(), ['incident-delete', 'request', 'incident-call', 'request-call', 'incident', 'request-delete'])
         self.assertEqual(tokens['incident'], 'aW5jaWRlbnQ6WHFUWXBoc0tvV2toMkdTM1dQTHpIZz09')
         self.assertEqual(decode_token(settings, tokens['incident']), 'incident')
+        self.assertEqual(tokens['incident-call'], 'aW5jaWRlbnQtY2FsbDpuQmNETks2a1I3NnpITGNRQ1pKNGpRPT0=')
+        self.assertEqual(decode_token(settings, tokens['incident-call']), 'incident-call')
+        self.assertEqual(tokens['incident-delete'], 'aW5jaWRlbnQtZGVsZXRlOldWSGk4anBsZ1ZUUlhFSDVHejJrMUE9PQ==')
+        self.assertEqual(decode_token(settings, tokens['incident-delete']), 'incident-delete')
         self.assertEqual(tokens['request'], 'cmVxdWVzdDpGT2krUDJpM0lJY0hEbFYxZ2R6UGZ3PT0=')
         self.assertEqual(decode_token(settings, tokens['request']), 'request')
+        self.assertEqual(tokens['request-call'], 'cmVxdWVzdC1jYWxsOlFwZkpqNVFvbTNjemVmOU8zaU5DWlE9PQ==')
+        self.assertEqual(decode_token(settings, tokens['request-call']), 'request-call')
+        self.assertEqual(tokens['request-delete'], 'cmVxdWVzdC1kZWxldGU6L292TlJRZTJaNmIxcW4rUEZLS1lpUT09')
+        self.assertEqual(decode_token(settings, tokens['request-delete']), 'request-delete')
 
         with open(os.path.abspath(os.path.dirname(__file__))+'/../.tokens', 'r') as handle:
             tokens2 = yaml.load(handle)
