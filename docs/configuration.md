@@ -1,8 +1,10 @@
 # How to configure a button?
 
-If you know how to modify a text file, then you can build the button that is perfectly adpated to your specific needs. There is one general configuration file for the server itself, and then one configuration file per button.
+If you know how to modify a text file, then you can build the button that is perfectly adpated to your specific needs.
 
-The Green Button project is provided with sample configuration files for two buttons: `incident` and `request`. These are described below for reference. You are encouraged to duplicate one of these files in the directory `buttons` and to edit it.
+The Green Button supports multiple buttons, each of them having a behaviour different from the others. There is one general configuration file for each button, and then one general configuration file for the bot itself.
+
+All configuration files for buttons are placed in the directory `buttons`. You are encouraged to start with one of the buttons provided there, for example `incident` or `request`.
 
 For example, if you want to create a button named `urgent_123` that is derived from `incident`:
 * go to the `buttons` directory
@@ -10,12 +12,16 @@ For example, if you want to create a button named `urgent_123` that is derived f
 * edit `urgent_123.yaml` and adapt messages, files, people, phone numbers, etc.
 * save changes and use the button: `http://<server_url>/urgent_123`
 
+If you are an employee of Dimension Data, you can benefit from the back-end server that has been deployed for the Green Button project. Send configuration instructions for your button over e-mail, and we will deploy these for you. Please join the Green Force group in Yammer and get more support.
+
+General configuration is set in `settings.yaml`, in the main directory of the bot.
+
 ## Sample configuration file for the button `incident`
 
 In this use case the button triggers interactions with support and delivery team.
 We consider that Alice is on provider side, and Bob is on client side.
 
-Alice says to Bob: you already know managed services from Dimension Data. Here is a new way to engage with us. Press the button when needed, and our teams will interact over a Cisco Spark room and over mobile phones.
+Alice says to Bob: "You already know managed services from Dimension Data. Here is a new way to engage with us. Press the button when needed, and our teams will interact over a Cisco Spark room and over mobile phones."
 
 1- Bob has a problem, and presses the button.  This creates a room, adds some people from the teams of Alice and of Bob, and pushes some content to it.  Interactions can start asynchronously with chat and files. When people enter the room they can discuss and move forward.
 
@@ -108,6 +114,10 @@ spark:
       - laurent.mars@company.com
       - expert1@apache.org
 
+    # number of minutes to reset the full cycle of the button
+    #
+    reset: 360
+
 ```
 
 ## Sample configuration file for the button `request`
@@ -176,11 +186,14 @@ spark:
       - laurent.mars@company.com
       - expert1@apache.org
 
+    # number of minutes to reset the full cycle of the button
+    #
+    reset: 20
 ```
 
 ## Sample server configuration
 
-The behaviour of the bot is set in a straightforward configuration file named `settings.yaml`, so have a look at it and adapt it to your needs.
+The behaviour of the bot is set in a straightforward configuration file named `settings.yaml`, so have a look at it and adapt it to your needs.  If you run a short-lived demonstration, you may probably use the sample file out of the box. For permanent buttons, you should add a private key and use secured tokens.
 
 ```yaml
 # Cisco Spark settings
@@ -225,5 +238,10 @@ server:
     # default button id if no information is provided over the wire
     #
     default: incident
+
+    # if you set a secret, use security tokens instead of button names in URL
+    #
+    #key: "a long and difficult pass phrase"
+
 ```
 
