@@ -21,7 +21,7 @@ So, at the end of the day the Green Button project supports a wide variety of op
 
 ## Step 2. Declare a bot at Cisco Spark for Developer, then save the precious token that is given in return.
 
-Cisco is using Single-Sign On for all of their sites, then there is an extra registration step at [Cisco Spark](https://www.ciscospark.com/). Once you are there, add a new application and provide required information, essentially, a name and an image. The site will give a token in return, that uniquely identifies your bot. Save this token as `CISCO_SPARK_BTTN_BOT` in the environment of your workstation.
+Cisco is using Single-Sign On for all of their sites, then there is an extra registration step at [Cisco Spark for Developers](https://developer.ciscospark.com/). Once you are there, add a new application and provide required information, essentially, a name and an image. The site will give a token in return, that uniquely identifies your bot. Save this token as `CISCO_SPARK_BTTN_BOT` in the environment of your workstation.
 
 ![2-cisco](2-cisco.png)
 
@@ -31,7 +31,7 @@ Go to [Twilio](https://www.twilio.com) and create an account there. From there y
 
 From the Twilio console you will reserve a public phone number, that will be the origin of calls given by the bot. You will also fetch your account SID and an authentication token, that should be saved as `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` respectively.
 
-![4-twilio](4-twilio)
+![4-twilio](4-twilio.png)
 
 ## Step 4. Get and configure a public web server.
 
@@ -143,6 +143,6 @@ Congratulations! Hit the button again, to demonstrate how the bot can cleverly m
 
 ## What's next?
 
-Now that the overall transmission chain is working, you may check [the configuration page](docs/configuration.md) and adapt the behaviour of buttons to your specific needs.
+Now that the overall transmission chain is working, you may check [the configuration page](configuration.md) and adapt the behaviour of buttons to your specific needs.
 
 
