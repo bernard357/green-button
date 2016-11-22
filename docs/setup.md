@@ -31,7 +31,7 @@ Go to [Twilio](https://www.twilio.com) and create an account there. From there y
 
 From the Twilio console you will reserve a public phone number, that will be the origin of calls given by the bot. You will also fetch your account SID and an authentication token, that should be saved as `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` respectively.
 
-![4-twilio](4-twilio.png)
+![3-twilio](3-twilio.png)
 
 ## Step 4. Get and configure a public web server.
 
