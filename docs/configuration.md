@@ -245,3 +245,17 @@ server:
 
 ```
 
+The default `settings.yaml` is suitable only for short-lived demonstrations. For any other usage, you should edit it, uncomment the `key:` line and add a long and random string.
+
+For example, change:
+
+```yaml
+    #key: "a long and difficult pass phrase"
+```
+
+to:
+
+```yaml
+    key: 'cmVxdWVzdC1kZWxldGU6L292TlJRZTJaNmIxcW4rUEZLS1lpUT09'
+```
+

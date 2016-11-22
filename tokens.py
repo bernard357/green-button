@@ -11,5 +11,5 @@ if 'key' in settings['server']:
         print('{}: {}'.format(key, tokens[key]))
 
 else:
-    print('Add a secret key to settings file if you want security')
+    print('Add a secret key to settings.yaml if you want security')
     print('No security token has been generated')
