@@ -259,3 +259,10 @@ to:
     key: 'cmVxdWVzdC1kZWxldGU6L292TlJRZTJaNmIxcW4rUEZLS1lpUT09'
 ```
 
+After any change of the `key:` parameter all the security tokens are changed as well. List new tokens from some SSH session to the server:
+
+```bash
+$ python tokens.py
+```
+
+

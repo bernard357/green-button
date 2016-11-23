@@ -21,6 +21,13 @@ import hmac
 from bottle import Bottle, route, run, request, abort, response
 web = Bottle()
 
+@web.route("/ping", method=['GET', 'POST'])
+def web_ping():
+    """
+    Tests the web service
+    """
+    return 'pong'
+
 #
 # invoked from bt.tn
 #

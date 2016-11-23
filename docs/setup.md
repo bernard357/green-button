@@ -3,6 +3,8 @@
 While the architecture is made of multiple components, each of them is rather simple to put in place.
 There is absolutely no need to be a software developer, just follow instructions below.
 
+If you are a Dimension Data employee, then you can benefit from the back-end that has been put in place for the project. Acquire a connected button and contact the Green Force group in Yammer. In other terms, you only have to do step 1, and can delegate other steps to a colleague.
+
 ## Step 1. Get a physical button that can generate web requests.
 
 If you prepare a demonstration of the Green Button, then you can go with a WiFi version, and pair it with your smartphone during the initial setup of the button. This will provide the button with connectivity to the Internet wherever you are. You should switch the button off most of the time, so that batteries are preserved as much as possible.
@@ -66,6 +68,15 @@ $ python -m plumbery fittings.yaml deploy
 This will create a virtual server on a MCP and configure it appropriately:
 
 ![4-plumbery](4-plumbery.png)
+
+Right after the setup of the server you may test the web service. From a web browser,
+type a web link with the public IP address of the server, and the suffix `/ping`.
+For example, if the bot runs on a server that has been given the address `168.123.45.67`, the test link would be:
+
+`http://168.123.45.67/ping`
+
+The browser should display `pong` as a successful response from the server.
+
 
 ## Step 5. Review button configurations.
 
@@ -144,5 +155,7 @@ Congratulations! Hit the button again, to demonstrate how the bot can cleverly m
 ## What's next?
 
 Now that the overall transmission chain is working, you may check [the configuration page](configuration.md) and adapt the behaviour of buttons to your specific needs.
+
+If something goes wrong for some reason, then [the frequently questions page](questions.md) may help you to troubleshoot the issue and fix it.
 
 
