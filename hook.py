@@ -280,6 +280,9 @@ def web_delete(button=None):
 
         delete_room(context)
 
+        global buttons
+        buttons.pop(button, None)
+
         return 'OK'
 
     except Exception as feedback:
