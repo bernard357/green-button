@@ -566,7 +566,7 @@ def phone_call(context, details):
             update = { 'markdown': 'No URL for the call - check configuration'}
             post_update(context, update)
             return
-        url = context['server']['url'].rstrip('/')+'/call/'+encode_token(context, context['name']+'-call')
+        url = context['server']['url'].rstrip('/')+'/call/'+encode_token(context, context['name'], action='call')
 
     logging.info("- using '{}'".format(url))
 
@@ -837,13 +837,16 @@ def configure(name="settings.yaml"):
 
     return settings
 
-def encode_token(settings, label=None):
+def encode_token(settings, label=None, action=None):
     """
     Provides a security token for a button
     """
 
     if label is None:
         label = settings['name']
+
+    if action is not None:
+        label += '-'+action
 
     if 'key' not in settings['server']:
         return label
@@ -902,11 +905,11 @@ def generate_tokens(settings, buttons):
 
         tokens[button] = encode_token(context, button)
 
-        tokens[button+'-call'] = encode_token(context, button+'-call')
+        tokens[button+'-call'] = encode_token(context, button, action='call')
 
-        tokens[button+'-delete'] = encode_token(context, button+'-delete')
+        tokens[button+'-delete'] = encode_token(context, button, action='delete')
 
-        tokens[button+'-initialise'] = encode_token(context, button+'-initialise')
+        tokens[button+'-initialise'] = encode_token(context, button, action='initialise')
 
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)
