@@ -279,6 +279,9 @@ def web_initialise(button=None):
         context = load_button(settings, button)
         delete_room(context)
 
+        global buttons
+        buttons.pop(button, None)
+
         context = load_button(settings, button)
         context['spark']['id'] = get_room(context)
 
