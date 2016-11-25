@@ -261,6 +261,35 @@ def create_room(context):
 
     return room_id
 
+@web.route("/initialise", method=['GET', 'POST'])
+@web.route("/initialise/<button>", method=['GET', 'POST'])
+def web_initialise(button=None):
+    """
+    Initialises a room
+
+    This function is called from far far away, over the Internet
+    """
+
+    if button is None:
+        button = settings['server']['default']
+
+    try:
+        button = decode_token(settings, button).split('-')[0]
+
+        context = load_button(settings, button)
+        delete_room(context)
+
+        context = load_button(settings, button)
+        context['spark']['id'] = get_room(context)
+
+        return 'OK'
+
+    except Exception as feedback:
+        logging.error(str(feedback))
+        response.status = 400
+        return 'Invalid request'
+
+
 @web.route("/delete", method=['GET', 'POST'])
 @web.route("/delete/<button>", method=['GET', 'POST'])
 def web_delete(button=None):
@@ -860,6 +889,8 @@ def generate_tokens(settings, buttons):
         tokens[button+'-call'] = encode_token(context, button+'-call')
 
         tokens[button+'-delete'] = encode_token(context, button+'-delete')
+
+        tokens[button+'-initialise'] = encode_token(context, button+'-initialise')
 
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)
