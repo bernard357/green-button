@@ -274,7 +274,7 @@ def web_initialise(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode_token(settings, button).split('-')[0]
+        button = decode_token(settings, button, action='initialise')
 
         context = load_button(settings, button)
         delete_room(context)
@@ -303,7 +303,7 @@ def web_delete(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode_token(settings, button).split('-')[0]
+        button = decode_token(settings, button, action='delete')
 
         context = load_button(settings, button)
 
@@ -604,7 +604,7 @@ def web_inbound_call(button=None):
         button = settings['server']['default']
 
     try:
-        button = decode_token(settings, button).split('-')[0]
+        button = decode_token(settings, button, action='call')
 
         logging.info("Receiving inbound call for button {}".format(button))
 
@@ -849,7 +849,7 @@ def encode_token(settings, label=None):
 
     return base64.b64encode(label+':'+hash)
 
-def decode_token(settings, token):
+def decode_token(settings, token, action=None):
     """
     Decodes button name from a security token
     """
@@ -872,7 +872,20 @@ def decode_token(settings, token):
         logging.error('ERROR: incorrect hash in security token')
         raise Exception('Invalid security token')
 
-    return label
+    if action is None:
+        return label
+
+    items = label.split('-', 1)
+
+    if len(items) < 2:
+        logging.error('ERROR: missing action in security token')
+        raise Exception('Invalid security token')
+
+    if items[1] != action:
+        logging.error('ERROR: incorrect action in security token')
+        raise Exception('Invalid security token')
+
+    return items[0]
 
 def generate_tokens(settings, buttons):
 

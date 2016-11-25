@@ -390,19 +390,64 @@ class HookTests(unittest.TestCase):
 
         settings = {'server': {'key': 'a_secret'}}
         tokens = generate_tokens(settings, ['incident', 'request'])
-        self.assertEqual(tokens.keys(), ['incident-delete', 'request', 'incident-call', 'request-call', 'incident', 'request-delete'])
+        self.assertEqual(sorted(tokens.keys()),
+            ['incident', 'incident-call', 'incident-delete', 'incident-initialise',
+             'request', 'request-call', 'request-delete', 'request-initialise'])
+
         self.assertEqual(tokens['incident'], 'aW5jaWRlbnQ6WHFUWXBoc0tvV2toMkdTM1dQTHpIZz09')
         self.assertEqual(decode_token(settings, tokens['incident']), 'incident')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['incident'], 'call')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['incident'], 'delete')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['incident'], 'initialise')
+
         self.assertEqual(tokens['incident-call'], 'aW5jaWRlbnQtY2FsbDpuQmNETks2a1I3NnpITGNRQ1pKNGpRPT0=')
         self.assertEqual(decode_token(settings, tokens['incident-call']), 'incident-call')
+        self.assertEqual(decode_token(settings, tokens['incident-call'], 'call'), 'incident')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['incident-call'], 'different-action')
+
         self.assertEqual(tokens['incident-delete'], 'aW5jaWRlbnQtZGVsZXRlOldWSGk4anBsZ1ZUUlhFSDVHejJrMUE9PQ==')
         self.assertEqual(decode_token(settings, tokens['incident-delete']), 'incident-delete')
+        self.assertEqual(decode_token(settings, tokens['incident-delete'], 'delete'), 'incident')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['incident-delete'], 'different-action')
+
+        self.assertEqual(tokens['incident-initialise'], 'aW5jaWRlbnQtaW5pdGlhbGlzZTpUYmFqaHpKbWlWVlJvVU54V0Z1Y0F3PT0=')
+        self.assertEqual(decode_token(settings, tokens['incident-initialise']), 'incident-initialise')
+        self.assertEqual(decode_token(settings, tokens['incident-initialise'], 'initialise'), 'incident')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['incident-initialise'], 'different-action')
+
         self.assertEqual(tokens['request'], 'cmVxdWVzdDpGT2krUDJpM0lJY0hEbFYxZ2R6UGZ3PT0=')
         self.assertEqual(decode_token(settings, tokens['request']), 'request')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['request'], 'call')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['request'], 'delete')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['request'], 'initialise')
+
         self.assertEqual(tokens['request-call'], 'cmVxdWVzdC1jYWxsOlFwZkpqNVFvbTNjemVmOU8zaU5DWlE9PQ==')
         self.assertEqual(decode_token(settings, tokens['request-call']), 'request-call')
+        self.assertEqual(decode_token(settings, tokens['request-call'], 'call'), 'request')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['request-call'], 'different-action')
+
         self.assertEqual(tokens['request-delete'], 'cmVxdWVzdC1kZWxldGU6L292TlJRZTJaNmIxcW4rUEZLS1lpUT09')
         self.assertEqual(decode_token(settings, tokens['request-delete']), 'request-delete')
+        self.assertEqual(decode_token(settings, tokens['request-delete'], 'delete'), 'request')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['request-delete'], 'different-action')
+
+        self.assertEqual(tokens['request-initialise'], 'cmVxdWVzdC1pbml0aWFsaXNlOi9KekVySndTTUpadXR0eGRWMytNWEE9PQ==')
+        self.assertEqual(decode_token(settings, tokens['request-initialise']), 'request-initialise')
+        self.assertEqual(decode_token(settings, tokens['request-initialise'], 'initialise'), 'request')
+        with self.assertRaises(Exception):
+            decode_token(settings, tokens['request-initialise'], 'different-action')
+
 
         with open(os.path.abspath(os.path.dirname(__file__))+'/../.tokens', 'r') as handle:
             tokens2 = yaml.load(handle)
