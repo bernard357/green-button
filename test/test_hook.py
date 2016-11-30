@@ -10,6 +10,7 @@ import mock
 from requests import ConnectionError
 import base64
 import yaml
+import vcr
 
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -158,6 +159,7 @@ class HookTests(unittest.TestCase):
 
         os.remove(os.path.abspath(os.path.dirname(__file__))+'/../buttons/temporary.yaml')
 
+    @vcr.use_cassette('fixtures/test_get_room.yaml')
     def test_get_room(self):
 
         print('***** Test get room ***')
@@ -175,6 +177,7 @@ class HookTests(unittest.TestCase):
 
     @mock.patch('hook.send_sms', return_value='pumpkins')
     @mock.patch('hook.phone_call', return_value='pumpkins')
+    @vcr.use_cassette('fixtures/test_incident.yaml')
     def test_incident(self, send_sms_patch, phone_call_patch):
 
         print('***** Test incident script ***')
@@ -212,6 +215,7 @@ class HookTests(unittest.TestCase):
 
     @mock.patch('hook.send_sms', return_value='pumpkins')
     @mock.patch('hook.phone_call', return_value='pumpkins')
+    @vcr.use_cassette('fixtures/test_request.yaml')
     def test_request(self, send_sms_patch, phone_call_patch):
 
         print('***** Test request script ***')
@@ -241,6 +245,7 @@ class HookTests(unittest.TestCase):
 
     @mock.patch('hook.send_sms', return_value='pumpkins')
     @mock.patch('hook.phone_call', return_value='pumpkins')
+    @vcr.use_cassette('fixtures/test_process_push.yaml')
     def test_process_push(self, send_sms_patch, phone_call_patch):
 
         print('***** Test process push ***')

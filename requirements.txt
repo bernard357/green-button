@@ -3,3 +3,4 @@ PyYAML
 requests
 requests_toolbelt
 twilio
+vcrpy
