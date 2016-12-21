@@ -11,7 +11,7 @@ If you prepare a demonstration of the Green Button, then you can go with a WiFi 
 
 For a fixed deployment you may consider a connectivity option that is better adapted to the Internet of Things (IoT). For example select a button that support GPRS, and add a SIM card from any cheap provider of data services. Also, across Europe some countries have Sigfox networks. Last but not least, you can connect a WiFi button to the network of your client, yet this is a bit more intrusive than other options.
 
-![1-bt.tn](1-bt.tn.png)
+![1-bt.tn](media/1-bt.tn.png)
 
 Based on our experience, here are some important factors that you should consider:
 
@@ -25,7 +25,7 @@ So, at the end of the day the Green Button project supports a wide variety of op
 
 Cisco is using Single-Sign On for all of their sites, then there is an extra registration step at [Cisco Spark for Developers](https://developer.ciscospark.com/). Once you are there, add a new application and provide required information, essentially, a name and an image. The site will give a token in return, that uniquely identifies your bot. Save this token as `CISCO_SPARK_BTTN_BOT` in the environment of your workstation.
 
-![2-cisco](2-cisco.png)
+![2-cisco](media/2-cisco.png)
 
 ## Step 3. Get credentials from Twilio.
 
@@ -33,7 +33,7 @@ Go to [Twilio](https://www.twilio.com) and create an account there. From there y
 
 From the Twilio console you will reserve a public phone number, that will be the origin of calls given by the bot. You will also fetch your account SID and an authentication token, that should be saved as `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` respectively.
 
-![3-twilio](3-twilio.png)
+![3-twilio](media/3-twilio.png)
 
 ## Step 4. Get and configure a public web server.
 
@@ -67,7 +67,7 @@ $ python -m plumbery fittings.yaml deploy
 
 This will create a virtual server on a MCP and configure it appropriately:
 
-![4-plumbery](4-plumbery.png)
+![4-plumbery](media/4-plumbery.png)
 
 Right after the setup of the server you may test the web service. From a web browser,
 type a web link with the public IP address of the server, and the suffix `/ping`.
@@ -140,7 +140,7 @@ Please note that only security tokens protect your system against dictionary att
 
 At this stage you have identified the web link that is associated with a configuration file. Now you can ask the actual button to use the link in case of push. If you have followed our recommendation, you would visit [my.bt.tn](http://my.bt.tn) and add an HTTP action to you registered button. This will take les than a minute.
 
-![6-my.bt.tn](6-my.bt.tn.png)
+![6-my.bt.tn](media/6-my.bt.tn.png)
 
 
 ## Step 7. Now launch Cisco Spark and press the button.
@@ -148,7 +148,7 @@ At this stage you have identified the web link that is associated with a configu
 After some seconds you should get a new room on screen, and a first update in Markdown.
 The button should return to quiet state (no led).
 
-![7-spark](7-spark.png)
+![7-spark](media/7-spark.png)
 
 Congratulations! Hit the button again, to demonstrate how the bot can cleverly manage multiple states.
 

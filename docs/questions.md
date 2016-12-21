@@ -26,7 +26,7 @@ And if you know [how to clone a GitHub project](https://help.github.com/articles
 * credentials at [Twilio](https://www.twilio.com) to use their communication services (SMS and voice)
 * some [instructions](setup.md) and goodwill :-)
 
-Please note that it is not required to use cloud services from Dimension Data. Instructions to install the bot at any Ubuntu box are also provided. On the other hand, if you have MCP credentials, then you can deploy the bot at more than 15 data centres world-wide, in 10 minutes. Check [the orchestration file](fittings.yaml) for more details.
+Please note that it is not required to use cloud services from Dimension Data. Instructions to install the bot at any Ubuntu box are also provided. On the other hand, if you have MCP credentials, then you can deploy the bot at more than 15 data centres world-wide, in 10 minutes. Check [the orchestration file](../fittings.yaml) for more details.
 
 If you are a Dimension Data employee, you can benefit directly from the back-end that has been put in place for the project. Acquire a connected button and contact the Green Force group in Yammer.
 
@@ -60,7 +60,7 @@ Check the configuration file `settings.yaml` to specify general parameters, such
 ### Is it easy to configure a button?
 
 Yes, since the behaviour of each button is described in a separate configuration file.
-Some [examples](buttons) are provided so that you have something to start with.
+Some [examples](../buttons) are provided so that you have something to start with.
 
 Configuration files are plain text files, where you describe in sequence what to do
 on first push of the button, on second push, etc.
