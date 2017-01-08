@@ -13,6 +13,8 @@ You can find countless presentations and documents on these topics, but what do 
 
 This is a contribution to the global community of IoT and digital practitioners. You can use it either to demonstrate what is possible today, or even to provide VIP services to selected clients. The Green Button project is ruled by the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
 
+This is an open source project, meaning that we rely on volunteers to show up and to contribute. [Contributions and feedback](docs/contributing.md) are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
+
 ## How to do this?
 
 The system has one or several physical buttons, and four different clouds. We selected a standard button from an European company called [bt.tn](https://bt.tn/). The full project, including the software, documentation and reference configuration files,  have been released as an open-source project on GitHub, so that any person can use it and contribute. [Cisco Spark](https://www.ciscospark.com/) provides the interaction back-end. [Twilio](https://www.twilio.com) is used for SMS and phone calls.
@@ -54,5 +56,22 @@ Ready to go? Check [the configuration page](docs/configuration.md) for more deta
 Well, maybe you would like to check [Frequently asked questions](docs/questions.md) and related responses.
 Then you can [raise an issue at the GitHub project page](https://github.com/bernard357/bt.tn-spark/issues) and get support from the project team.
 
-Last but not least, if you are a Dimension Data employee, reach out the Green Force group at Yammer and engage with
+If you are a Dimension Data employee, reach out the Green Force group at Yammer and engage with
 other digital practitioners.
+
+## How would you like to contribute?
+
+We want you to feel as comfortable as possible with this project, whatever your skills are.
+Here are some ways to contribute:
+
+* [use it for yourself](docs/contributing.md)
+* [communicate about the project](docs/contributing.md)
+* [submit feedback](docs/contributing.md)
+* [report a bug](docs/contributing.md)
+* [write or fix documentation](docs/contriuting.md)
+* [fix a bug or an issue](docs/contributing.md)
+* [implement some feature](docs/contributing.md)
+
+Every [contribution and feedback](docs/contributing.md) matters, so thank you for your efforts.
+
+
