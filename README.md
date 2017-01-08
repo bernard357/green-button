@@ -15,7 +15,7 @@ This is a contribution to the global community of IoT and digital practitioners.
 
 This is an open source project, meaning that we rely on volunteers to show up and to contribute. [Contributions and feedback](docs/contributing.md) are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
 
-## How to do this?
+## How is this done?
 
 The system has one or several physical buttons, and four different clouds. We selected a standard button from an European company called [bt.tn](https://bt.tn/). The full project, including the software, documentation and reference configuration files,  have been released as an open-source project on GitHub, so that any person can use it and contribute. [Cisco Spark](https://www.ciscospark.com/) provides the interaction back-end. [Twilio](https://www.twilio.com) is used for SMS and phone calls.
 

@@ -78,7 +78,7 @@ to improve project documentation.
 
 For example, here are the typical steps required for the addition of a new tutorial page:
 
-1. From [the project page at GitHub](https://github.com/bernard357/bt.tn-spark), [fork it](https://help.github.com/articles/fork-a-repo/) so that you have your own project space.
+1. From [the project page at GitHub](https://github.com/bernard357/bt.tn-spark), you can [fork it](https://help.github.com/articles/fork-a-repo/) so that you have your own project space.
    If you do not have a GitHub account, please create one. This is provided for free, and will
    make you a proud member of a global community that matters.
 
