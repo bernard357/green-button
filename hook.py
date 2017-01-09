@@ -4,6 +4,7 @@ import logging
 import os
 import requests
 from requests_toolbelt import MultipartEncoder
+import socket
 import sys
 import time
 from twilio import TwilioRestException
@@ -30,7 +31,7 @@ def web_ping():
 
 @web.get('/files/<filename:path>')
 def serve_file(filename):
-    logging.info('Serving {}'.format(filename))
+    logging.info("Serving '{}'".format(filename))
     return static_file(filename, root='./files')
 
 @web.route("/index", method=['GET', 'POST'])
@@ -52,21 +53,25 @@ def web_index(token=None):
             raise ValueError('Invalid label in token')
 
     except Exception as feedback:
-        logging.error(str(feedback))
-        response.status = 400
-        return 'Invalid request'
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            logging.error("Unable to serve the index page")
+            raise
+        else:
+            logging.error(str(feedback))
+            response.status = 400
+            return 'Invalid request'
 
     items = []
     global buttons
     for button in buttons:
         items.append({
             'label': button,
-            'delete-url': settings['tokens'].get(button+'-delete'),
-            'initialise-url': settings['tokens'].get(button+'-initialise'),
-            'push-url': settings['tokens'].get(button),
+            'delete-url': '/delete/'+settings['tokens'].get(button+'-delete'),
+            'initialise-url': '/initialise/'+settings['tokens'].get(button+'-initialise'),
+            'push-url': '/'+settings['tokens'].get(button),
             })
+    logging.debug('Buttons: {}'.format(items))
 
-    logging.debug(items)
     return template('views/list_items', prefix=settings['server']['url'], items=items)
 
 #
@@ -93,10 +98,23 @@ def web_press(button=None):
 
         return handle_button(context)
 
+    except socket.error as feedback:
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            logging.error("Unable to push '{}'".format(button))
+            raise
+        else:
+            logging.error(str(feedback))
+            response.status = 500
+            return 'Internal error'
+
     except Exception as feedback:
-        logging.error(str(feedback))
-        response.status = 400
-        return 'Invalid request'
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            logging.error("Unable to push '{}'".format(button))
+            raise
+        else:
+            logging.error(str(feedback))
+            response.status = 400
+            return 'Invalid request'
 
 def handle_button(context):
     """
@@ -107,7 +125,7 @@ def handle_button(context):
 
     """
 
-    logging.info("Handling button {}".format(context['name']))
+    logging.info("Handling button '{}'".format(context['name']))
 
     context['spark']['id'] = get_room(context)
 
@@ -200,7 +218,7 @@ def get_push_details(context):
         #
         if 'file' in item:
 
-            logging.info("- attaching file {}".format(item['file']))
+            logging.info("- attaching file '{}'".format(item['file']))
 
             if 'label' in item:
                 text = item['label']
@@ -283,7 +301,7 @@ def create_room(context):
     This function also adds appropriate audience to the room
     """
 
-    logging.info("Creating Cisco Spark room {}".format(context['spark']['room']))
+    logging.info("Creating Cisco Spark room '{}'".format(context['spark']['room']))
 
     url = 'https://api.ciscospark.com/v1/rooms'
     headers = {'Authorization': 'Bearer '+context['spark']['CISCO_SPARK_BTTN_BOT']}
@@ -314,6 +332,8 @@ def web_initialise(button=None):
     if button is None:
         button = settings['server']['default']
 
+    logging.info("Initialising button '{}'".format(button))
+
     try:
         button = decode_token(settings, button, action='initialise')
 
@@ -329,9 +349,13 @@ def web_initialise(button=None):
         return 'OK'
 
     except Exception as feedback:
-        logging.error(str(feedback))
-        response.status = 400
-        return 'Invalid request'
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            logging.error("Unable to initialise '{}'".format(button))
+            raise
+        else:
+            logging.error(str(feedback))
+            response.status = 400
+            return 'Invalid request'
 
 @web.route("/delete", method=['GET', 'POST'])
 @web.route("/delete/<button>", method=['GET', 'POST'])
@@ -345,6 +369,8 @@ def web_delete(button=None):
     if button is None:
         button = settings['server']['default']
 
+    logging.info("Deleting button '{}'".format(button))
+
     try:
         button = decode_token(settings, button, action='delete')
 
@@ -357,9 +383,13 @@ def web_delete(button=None):
         return 'OK'
 
     except Exception as feedback:
-        logging.error(str(feedback))
-        response.status = 400
-        return 'Invalid request'
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            logging.error("Unable to delete '{}'".format(button))
+            raise
+        else:
+            logging.error(str(feedback))
+            response.status = 400
+            return 'Invalid request'
 
 def delete_room(context):
     """
@@ -510,8 +540,8 @@ def send_sms(context, details):
 
     for line in details:
         if not isinstance(line, dict):
-            logging.info("- invalid statement: '{}'".format(str(line)))
-            update = { 'markdown': 'Unable to send a SMS - check configuration'}
+            logging.error("Invalid statement: '{}'".format(str(line)))
+            update = { 'markdown': 'Error: Unable to send a SMS - check configuration'}
             post_update(context, update)
             return
 
@@ -525,16 +555,16 @@ def send_sms(context, details):
             to_numbers.append(line['number'])
 
     if len(message) < 4:
-        logging.info("- message should have at least 4 characters: '{}'".format(str(message)))
-        update = { 'markdown': 'No SMS message to send - check configuration'}
+        logging.error("Message should have at least 4 characters: '{}'".format(str(message)))
+        update = { 'markdown': 'Error: No SMS message to send - check configuration'}
         post_update(context, update)
         return
 
     logging.info("- sending '{}'".format(message))
 
     if len(to_numbers) < 1:
-        logging.info("- no phone number has been defined")
-        update = { 'markdown': 'No target phone number for SMS - check configuration'}
+        logging.error("No phone number has been defined")
+        update = { 'markdown': 'Error: No target phone number for SMS - check configuration'}
         post_update(context, update)
         return
 
@@ -550,8 +580,18 @@ def send_sms(context, details):
                                    to=number,
                                    from_=from_number)
 
+        except socket.error as feedback:
+            logging.error("Unable to communicate with Twilio API endpoint")
+            logging.error(str(feedback))
+            update = { 'markdown': 'Error: Unable to communicate with Twilio API endpoint'}
+            post_update(context, update)
+            return
+
         except TwilioRestException as feedback:
-            logging.info("- {}".format(str(feedback)))
+            logging.error("Receive Exception from Twilio API")
+            logging.error(str(feedback))
+            update = { 'markdown': 'Error: Receive Exception from Twilio API'}
+            post_update(context, update)
             return
 
     update = { 'markdown': "SMS '{}' has been sent to '{}'".format(message,
@@ -582,8 +622,8 @@ def phone_call(context, details):
 
     for line in details:
         if not isinstance(line, dict):
-            logging.info("- invalid statement: '{}'".format(str(line)))
-            update = { 'markdown': 'Unable to call - check configuration'}
+            logging.error("Invalid statement: '{}'".format(str(line)))
+            update = { 'markdown': 'Error: Unable to call - check configuration'}
             post_update(context, update)
             return
 
@@ -600,9 +640,9 @@ def phone_call(context, details):
             to_numbers.append(line['number'])
 
     if len(url) < 4:
-        if 'url' not in context['server']:
-            logging.info("- missing url: configuration information")
-            update = { 'markdown': 'No URL for the call - check configuration'}
+        if context['server']['url'] is None:
+            logging.error("Missing url: configuration information")
+            update = { 'markdown': 'Error: No URL for the call - check configuration'}
             post_update(context, update)
             return
         url = context['server']['url'].rstrip('/')+'/call/'+encode_token(context, context['name'], action='call')
@@ -610,8 +650,8 @@ def phone_call(context, details):
     logging.info("- using '{}'".format(url))
 
     if len(to_numbers) < 1:
-        logging.info("- no phone number has been defined")
-        update = { 'markdown': 'No target phone number for call - check configuration'}
+        logging.error("No phone number has been defined")
+        update = { 'markdown': 'Error: No target phone number for call - check configuration'}
         post_update(context, update)
         return
 
@@ -629,8 +669,18 @@ def phone_call(context, details):
             update = { 'markdown': "Calling '{}'".format(number)}
             post_update(context, update)
 
+        except socket.error as feedback:
+            logging.error("Unable to communicate with Twilio API endpoint")
+            logging.error(str(feedback))
+            update = { 'markdown': 'Error: Unable to communicate with Twilio API endpoint'}
+            post_update(context, update)
+            return
+
         except TwilioRestException as feedback:
-            logging.info("- {}".format(str(feedback)))
+            logging.error("Receive Exception from Twilio API")
+            logging.error(str(feedback))
+            update = { 'markdown': 'Error: Receive Exception from Twilio API'}
+            post_update(context, update)
             return
 
 @web.route("/call", method=['GET', 'POST'])
@@ -645,10 +695,10 @@ def web_inbound_call(button=None):
     if button is None:
         button = settings['server']['default']
 
+    logging.info("Receiving inbound call for button '{}'".format(button))
+
     try:
         button = decode_token(settings, button, action='call')
-
-        logging.info("Receiving inbound call for button {}".format(button))
 
         context = load_button(settings, button)
         update, twilio_action = get_push_details(context)
@@ -670,10 +720,13 @@ def web_inbound_call(button=None):
         return str(behaviour)
 
     except Exception as feedback:
-        logging.error(str(feedback))
-        response.status = 400
-        return 'Invalid request'
-
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            logging.error("Unable to handle inbound call for '{}'".format(button))
+            raise
+        else:
+            logging.error(str(feedback))
+            response.status = 400
+            return 'Invalid request'
 
 #
 # the collection of buttons that we manage
@@ -866,14 +919,6 @@ def configure(name="settings.yaml"):
     if 'default' not in settings['server']:
         settings['server']['default'] = 'incident'
 
-    if 'DEBUG' in settings:
-        debug = settings['DEBUG']
-    else:
-        debug = os.environ.get('DEBUG', False)
-    settings['DEBUG'] = debug
-    if debug:
-        logging.basicConfig(level=logging.DEBUG)
-
     return settings
 
 def encode_token(settings, label=None, action=None):
@@ -905,17 +950,17 @@ def decode_token(settings, token, action=None):
     try:
         label, hash = base64.b64decode(token).split(':', 1)
     except TypeError as feedback:
-        logging.error('ERROR: incorrect encoding of the security token')
+        logging.error('Incorrect encoding of the security token')
         raise Exception('Invalid security token')
     except ValueError as feedback:
-        logging.error('ERROR: no hash in security token')
+        logging.error('No hash in security token')
         raise Exception('Invalid security token')
 
     expected = base64.b64encode(
         hmac.new(settings['server']['key'], label).digest())
 
     if hash != expected:
-        logging.error('ERROR: incorrect hash in security token')
+        logging.error('Incorrect hash in security token')
         raise Exception('Invalid security token')
 
     if action is None:
@@ -924,11 +969,11 @@ def decode_token(settings, token, action=None):
     items = label.split('-', 1)
 
     if len(items) < 2:
-        logging.error('ERROR: missing action in security token')
+        logging.error('Missing action in security token')
         raise Exception('Invalid security token')
 
     if items[1] != action:
-        logging.error('ERROR: incorrect action in security token')
+        logging.error('Incorrect action in security token')
         raise Exception('Invalid security token')
 
     return items[0]
@@ -953,8 +998,6 @@ def generate_tokens(settings, buttons):
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)
 
-    logging.debug(tokens)
-
     return tokens
 
 #
@@ -971,15 +1014,17 @@ if __name__ == "__main__":
     # read configuration file, look at the environment
     #
     settings = configure()
+    logging.debug('Settings: {}'.format(settings))
 
     # pre-load all available buttons
     #
     load_buttons(settings)
+    logging.debug('Tokens: {}'.format(settings['tokens']))
 
     # wait for button pushes and other web requests
     #
     logging.info("Preparing for web requests")
     web.run(host='0.0.0.0',
         port=settings['server']['port'],
-        debug=settings['DEBUG'],
+        debug=(logging.getLogger().getEffectiveLevel() == logging.DEBUG),
         server=os.environ.get('SERVER', "auto"))
