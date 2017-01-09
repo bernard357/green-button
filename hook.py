@@ -913,7 +913,7 @@ def generate_tokens(settings, buttons):
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)
 
-    logging.info(tokens)
+    logging.debug(tokens)
 
     return tokens
 
