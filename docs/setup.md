@@ -44,7 +44,7 @@ $ sudo apt-get install -y ntp git python-pip
 $ cd /home/ubuntu/
 $ git clone https://github.com/bernard357/bt.tn-spark.git
 $ cd bt.tn-spark/
-$ pip install -r requirements.txt
+$ sudo pip install -r requirements.txt
 $ export CISCO_SPARK_BTTN_BOT="<whatever_your_spark_token_is>"
 $ export TWILIO_ACCOUNT_SID="<account_sid_from_twilio>"
 $ export TWILIO_AUTH_TOKEN="<auth-token_from_twilio>"
