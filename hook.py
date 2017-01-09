@@ -309,7 +309,6 @@ def web_delete(button=None):
         button = decode_token(settings, button, action='delete')
 
         context = load_button(settings, button)
-
         delete_room(context)
 
         global buttons
@@ -923,6 +922,11 @@ def generate_tokens(settings, buttons):
 #
 
 if __name__ == "__main__":
+
+    # uncomment only one
+    #
+    logging.basicConfig(format='%(message)s', level=logging.INFO)
+    #logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
     # read configuration file, look at the environment
     #
