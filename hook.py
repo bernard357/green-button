@@ -18,7 +18,7 @@ import hmac
 # web services
 #
 
-from bottle import Bottle, route, run, request, abort, response
+from bottle import Bottle, route, run, request, abort, response, static_file, template
 web = Bottle()
 
 @web.route("/ping", method=['GET', 'POST'])
@@ -27,6 +27,47 @@ def web_ping():
     Tests the web service
     """
     return 'pong'
+
+@web.get('/files/<filename:path>')
+def serve_file(filename):
+    logging.info('Serving {}'.format(filename))
+    return static_file(filename, root='./files')
+
+@web.route("/index", method=['GET', 'POST'])
+@web.route("/index/<token>", method=['GET', 'POST'])
+def web_index(token=None):
+    """
+    provides an index of buttons
+
+    This function is called from far far away, over the Internet
+    """
+
+    logging.info('Serving index page')
+
+    try:
+        if 'key' not in settings['server']:
+            pass
+
+        elif decode_token(settings, token, action='index') != 'index':
+            raise ValueError('Invalid label in token')
+
+    except Exception as feedback:
+        logging.error(str(feedback))
+        response.status = 400
+        return 'Invalid request'
+
+    items = []
+    global buttons
+    for button in buttons:
+        items.append({
+            'label': button,
+            'delete-url': 'delete-url',
+            'initialise-url': 'initialise-url',
+            'push-url': 'push-url',
+            })
+
+    logging.debug(items)
+    return template('views/list_items', prefix=settings['server']['url'], items=items)
 
 #
 # invoked from bt.tn
@@ -291,7 +332,6 @@ def web_initialise(button=None):
         logging.error(str(feedback))
         response.status = 400
         return 'Invalid request'
-
 
 @web.route("/delete", method=['GET', 'POST'])
 @web.route("/delete/<button>", method=['GET', 'POST'])
@@ -871,7 +911,8 @@ def decode_token(settings, token, action=None):
         logging.error('ERROR: no hash in security token')
         raise Exception('Invalid security token')
 
-    expected = base64.b64encode(hmac.new(settings['server']['key'], label).digest())
+    expected = base64.b64encode(
+        hmac.new(settings['server']['key'], label).digest())
 
     if hash != expected:
         logging.error('ERROR: incorrect hash in security token')
@@ -909,6 +950,10 @@ def generate_tokens(settings, buttons):
         tokens[button+'-delete'] = encode_token(context, button, action='delete')
 
         tokens[button+'-initialise'] = encode_token(context, button, action='initialise')
+
+
+    context = { 'server': {'key': settings['server']['key']}}
+    tokens['index'] = encode_token(context, 'index')
 
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)
