@@ -61,9 +61,9 @@ def web_index(token=None):
     for button in buttons:
         items.append({
             'label': button,
-            'delete-url': 'delete-url',
-            'initialise-url': 'initialise-url',
-            'push-url': 'push-url',
+            'delete-url': settings['tokens'].get(button+'-delete'),
+            'initialise-url': settings['tokens'].get(button+'-initialise'),
+            'push-url': settings['tokens'].get(button),
             })
 
     logging.debug(items)
@@ -884,11 +884,11 @@ def encode_token(settings, label=None, action=None):
     if label is None:
         label = settings['name']
 
-    if action is not None:
-        label += '-'+action
-
     if 'key' not in settings['server']:
         return label
+
+    if action is not None:
+        label += '-'+action
 
     hash = base64.b64encode(hmac.new(settings['server']['key'], label).digest())
 
@@ -935,25 +935,20 @@ def decode_token(settings, token, action=None):
 
 def generate_tokens(settings, buttons):
 
-    if 'key' not in settings['server']:
-        return {}
-
     tokens = {}
     for button in buttons:
 
-        context = { 'server': {'key': settings['server']['key']}}
+        tokens[button] = encode_token(settings, button)
 
-        tokens[button] = encode_token(context, button)
+        tokens[button+'-call'] = encode_token(settings, button, action='call')
 
-        tokens[button+'-call'] = encode_token(context, button, action='call')
+        tokens[button+'-delete'] = encode_token(settings, button, action='delete')
 
-        tokens[button+'-delete'] = encode_token(context, button, action='delete')
+        tokens[button+'-initialise'] = encode_token(settings, button, action='initialise')
 
-        tokens[button+'-initialise'] = encode_token(context, button, action='initialise')
+    tokens['index'] = encode_token(settings, 'index')
 
-
-    context = { 'server': {'key': settings['server']['key']}}
-    tokens['index'] = encode_token(context, 'index')
+    settings['tokens'] = tokens
 
     with open(os.path.abspath(os.path.dirname(__file__))+'/.tokens', 'w') as handle:
         yaml.dump(tokens, handle, default_flow_style=False)

@@ -7,8 +7,8 @@
   <tr>
     <td>{{ item['label'] }}</td>
     <td><a href="/{{ item['push-url'] }}">push</a></td>
-    <td><a href="/delete/{{ item['delete-url'] }}">delete</a></td>
-    <td><a href="/initialise/{{ item['initialise-url'] }}">initialise</a></td>
+    <td><a href="/delete/{{ item['delete-url'] }}">delete room</a></td>
+    <td><a href="/initialise/{{ item['initialise-url'] }}">initialise room</a></td>
   </tr>
 %end
 </table>
