@@ -49,7 +49,7 @@ def web_index(token=None):
         if 'key' not in settings['server']:
             pass
 
-        elif decode_token(settings, token, action='index') != 'index':
+        elif decode_token(settings, token) != 'index':
             raise ValueError('Invalid label in token')
 
     except Exception as feedback:
